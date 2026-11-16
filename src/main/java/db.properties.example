@@ -1,0 +1,6 @@
+# ClubCheck DB 접속 정보 양식
+# 이 파일을 같은 폴더에 db.properties 라는 이름으로 복사한 뒤 본인 MySQL 계정에 맞게 고친다.
+# db.properties 는 .gitignore 에 등록되어 있어 git 에 올라가지 않는다.
+DB_URL=jdbc:mysql://localhost:3306/clubcheck?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+DB_USER=root
+DB_PASSWORD=여기에_비밀번호를_입력
