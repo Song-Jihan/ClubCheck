@@ -1,0 +1,5 @@
+# DB 접속 정보 (각자 로컬에서만 사용)
+/src/main/java/db.properties
+
+# Eclipse 빌드 결과물 (컴파일된 클래스에 접속 정보가 그대로 남을 수 있다)
+/build/
