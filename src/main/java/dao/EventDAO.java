@@ -28,6 +28,11 @@ public class EventDAO {
 		return selectList(SELECT_EVENT + "WHERE e.event_date < NOW() ORDER BY e.event_date DESC");
 	}
 
+	/** 출석 체크가 열린 행사(오늘까지의 행사)를 날짜순으로 조회한다. 부원 출결 현황의 열로 쓴다. */
+	public ArrayList<Event> getCheckOpenEvents() throws SQLException {
+		return selectList(SELECT_EVENT + "WHERE e.event_date < DATE_ADD(CURDATE(), INTERVAL 1 DAY) ORDER BY e.event_date ASC");
+	}
+
 	/** 행사 번호로 한 건을 조회한다. 없으면 null 을 돌려준다. */
 	public Event getEventById(int eventId) throws SQLException {
 		String sql = SELECT_EVENT + "WHERE e.event_id = ?";

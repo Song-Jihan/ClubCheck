@@ -7,9 +7,11 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import dto.Attendance;
+import dto.MemberSummary;
 import util.DBConnection;
 
 /** attendance 테이블(참석 신청과 출석 상태)에 접근하는 클래스. */
@@ -184,6 +186,55 @@ public class AttendanceDAO {
 				throw e;
 			}
 		}
+	}
+
+	/**
+	 * 모든 부원의 출결을 GROUP BY 로 집계한다 (출석·결석·미처리 신청 횟수).
+	 * 한 번도 신청하지 않은 부원도 나오도록 LEFT JOIN 을 쓴다. 이때 SUM 이 NULL 이 되므로 COALESCE 로 0 을 넣는다.
+	 */
+	public ArrayList<MemberSummary> getMemberSummaries() throws SQLException {
+		String sql = "SELECT m.id, m.name, m.student_no, m.role, "
+				+ "COALESCE(SUM(a.status = 'PRESENT'), 0) AS present_count, "
+				+ "COALESCE(SUM(a.status = 'ABSENT'), 0) AS absent_count, "
+				+ "COALESCE(SUM(a.status = 'APPLIED'), 0) AS applied_count "
+				+ "FROM club_member m LEFT JOIN attendance a ON a.member_id = m.id "
+				+ "GROUP BY m.id, m.name, m.student_no, m.role "
+				+ "ORDER BY m.name, m.id";
+		ArrayList<MemberSummary> list = new ArrayList<MemberSummary>();
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				ResultSet rs = pstmt.executeQuery()) {
+			while (rs.next()) {
+				MemberSummary s = new MemberSummary();
+				s.setId(rs.getString("id"));
+				s.setName(rs.getString("name"));
+				s.setStudentNo(rs.getString("student_no"));
+				s.setRole(rs.getString("role"));
+				s.setPresentCount(rs.getInt("present_count"));
+				s.setAbsentCount(rs.getInt("absent_count"));
+				s.setAppliedCount(rs.getInt("applied_count"));
+				list.add(s);
+			}
+		}
+		return list;
+	}
+
+	/** 모든 출석 기록을 "행사번호/회원아이디" → 상태 로 돌려준다. 행사별 출결표를 채울 때 쓴다. */
+	public HashMap<String, String> getStatusMap() throws SQLException {
+		HashMap<String, String> map = new HashMap<String, String>();
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement("SELECT event_id, member_id, status FROM attendance");
+				ResultSet rs = pstmt.executeQuery()) {
+			while (rs.next()) {
+				map.put(statusKey(rs.getInt("event_id"), rs.getString("member_id")), rs.getString("status"));
+			}
+		}
+		return map;
+	}
+
+	/** getStatusMap 의 키 */
+	public static String statusKey(int eventId, String memberId) {
+		return eventId + "/" + memberId;
 	}
 
 	private ArrayList<Attendance> toList(PreparedStatement pstmt) throws SQLException {

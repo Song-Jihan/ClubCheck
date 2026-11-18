@@ -71,6 +71,7 @@ JSP 기초 기술만으로 만든 동아리 행사 등록·참석 신청·출석
 | 참석 신청·취소 | `event.jsp` → `processApply.jsp`, `processCancel.jsp` | 세션의 회원 아이디 사용, 트랜잭션 + `SELECT ... FOR UPDATE`로 정원 초과 방지 |
 | 출석 체크 | `checkAttendance.jsp` → `processCheckAttendance.jsp` | 관리자 전용, 행사 당일부터, 여러 명을 한 번에 저장(트랜잭션) |
 | 내 참석 기록 | `myPage.jsp` | JOIN 조회, 출석률(출석 ÷ 출석 처리된 행사), div 너비로 그린 막대 |
+| 부원 출결 현황 | `members.jsp` | 관리자 전용. 행사별 탭: 부원 × 오늘까지의 행사 출결표와 출석·결석 횟수. 출석률 탭: `GROUP BY` 집계, 이름순·출석률순 정렬 |
 
 ### 참석 신청 규칙
 
@@ -95,7 +96,7 @@ ClubCheck
 ├─ src/main/java
 │  ├─ db.properties.example  DB 접속 정보 양식 (복사해서 db.properties로 사용)
 │  ├─ dao/                   EventDAO, MemberDAO, AttendanceDAO (테이블 접근)
-│  ├─ dto/                   Event, Member, Attendance (자바빈)
+│  ├─ dto/                   Event, Member, Attendance, MemberSummary (자바빈)
 │  └─ util/                  DB 연결, 출력 도우미, 입력 검사, 포스터 업로드
 └─ src/main/webapp
    ├─ events.jsp             행사 목록 (첫 화면)
@@ -109,6 +110,7 @@ ClubCheck
    ├─ processDeleteEvent.jsp 행사 삭제
    ├─ processApply.jsp       참석 신청 (processCancel.jsp: 취소)
    ├─ checkAttendance.jsp    출석 체크 (processCheckAttendance.jsp 가 저장)
+   ├─ members.jsp            부원 출결 현황 (행사별 / 출석률)
    ├─ menu.jsp, footer.jsp   공통 메뉴와 푸터
    ├─ resources/             CSS, JS(유효성 검사), 포스터 이미지
    └─ WEB-INF/               web.xml, 라이브러리
