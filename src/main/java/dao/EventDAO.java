@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import dto.Event;
 import util.DBConnection;
 
-/** club_event 테이블에 접근하는 클래스. */
 public class EventDAO {
 
 	// 행사 정보와 함께 현재 신청 인원(applied_count)을 같이 조회한다

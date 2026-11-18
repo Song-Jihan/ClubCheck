@@ -2,7 +2,10 @@
 
 JSP 기초 기술만으로 만든 동아리 행사 등록·참석 신청·출석 관리 웹 애플리케이션입니다.
 
-> 현재 구현 단계: **1단계 (DB 스키마, 공통 뼈대, 행사 목록·상세 조회)**
+> 현재 구현 단계: **P1 (회원가입·로그인·로그아웃, 세션 권한 확인, 아이디 저장 쿠키)**
+>
+> - P0: DB 스키마, 공통 뼈대, 행사 목록·상세 조회
+> - P1: 회원 기능
 
 ## 실행 환경
 
@@ -20,8 +23,8 @@ JSP 기초 기술만으로 만든 동아리 행사 등록·참석 신청·출석
    `File > Import > General > Existing Projects into Workspace`로 가져옵니다.
 
 2. **MySQL 드라이버 추가**
-   `mysql-connector-j-8.x.x.jar`를 `src/main/webapp/WEB-INF/lib/`에 복사합니다.
-   (이 jar는 저장소에 포함되어 있지 않습니다.)
+   `src/main/webapp/WEB-INF/lib/mysql-connector-j-8.0.33.jar`가 저장소에 포함되어 있습니다.
+   다른 버전을 쓰려면 이 파일을 교체합니다.
 
 3. **DB 만들기**
    MySQL Workbench 또는 콘솔에서 아래 순서로 실행합니다.
@@ -49,7 +52,18 @@ JSP 기초 기술만으로 만든 동아리 행사 등록·참석 신청·출석
 | admin | admin1234 | 관리자 |
 | haneul, doyun, seoyeon, minjun | pass1234 | 일반 회원 |
 
-회원 이름과 학번은 모두 가상의 값입니다. (로그인 기능은 2단계에서 추가됩니다.)
+회원 이름과 학번은 모두 가상의 값입니다.
+
+## 구현된 기능
+
+| 기능 | 화면 | 사용 기술 |
+|---|---|---|
+| 회원가입 | `join.jsp` → `processJoin.jsp` | 폼 태그, JS 정규식 검사 + 서버 검사(`MemberValidator`), 중복 검사, `jsp:forward` |
+| 로그인 | `login.jsp` → `processLogin.jsp` | 세션(`loginId`, `loginName`, `loginRole`), 로그인 시 세션 재발급 |
+| 아이디 저장 | `login.jsp` | 쿠키 `savedId` (30일, HttpOnly) |
+| 로그아웃 | `logout.jsp` | `session.invalidate()` |
+| 내 정보 | `myPage.jsp` | 로그인 확인 `loginCheck.jsp` |
+| 관리자 확인 | `adminCheck.jsp` | 관리자 화면 맨 위에 include |
 
 ## 디렉터리 구조
 
@@ -58,14 +72,19 @@ ClubCheck
 ├─ sql/                      DB 스키마와 시드 데이터
 ├─ src/main/java
 │  ├─ db.properties.example  DB 접속 정보 양식 (복사해서 db.properties로 사용)
-│  ├─ dao/EventDAO.java      행사 테이블 조회
-│  ├─ dto/Event.java         행사 자바빈
-│  └─ util/                  DB 연결, 출력 도우미
+│  ├─ dao/                   EventDAO, MemberDAO (테이블 접근)
+│  ├─ dto/                   Event, Member (자바빈)
+│  └─ util/                  DB 연결, 출력 도우미, 회원가입 검사
 └─ src/main/webapp
    ├─ events.jsp             행사 목록 (첫 화면)
    ├─ event.jsp              행사 상세
+   ├─ join.jsp, login.jsp    회원가입, 로그인 (process*.jsp 가 처리)
+   ├─ logout.jsp, myPage.jsp 로그아웃, 내 정보
+   ├─ loginCheck.jsp         로그인 확인 (include 용)
+   ├─ adminCheck.jsp         관리자 확인 (include 용)
+   ├─ message.jsp            안내 문구 (include 용)
    ├─ menu.jsp, footer.jsp   공통 메뉴와 푸터
-   ├─ resources/             CSS, 포스터 이미지
+   ├─ resources/             CSS, JS(유효성 검사), 포스터 이미지
    └─ WEB-INF/               web.xml, 라이브러리
 ```
 

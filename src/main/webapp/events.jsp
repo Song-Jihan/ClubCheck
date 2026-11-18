@@ -30,6 +30,7 @@
 <body>
 	<div class="container py-4">
 		<%@ include file="menu.jsp"%>
+		<%@ include file="message.jsp"%>
 
 		<div class="p-5 mb-4 bg-body-tertiary rounded-3">
 			<div class="container-fluid py-3">
