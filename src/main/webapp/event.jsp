@@ -32,6 +32,7 @@
 <body>
 	<div class="container py-4">
 		<%@ include file="menu.jsp"%>
+		<%@ include file="message.jsp"%>
 
 		<div class="p-5 mb-4 bg-body-tertiary rounded-3">
 			<div class="container-fluid py-3">
@@ -84,6 +85,21 @@
 				<p>
 					<a href="./events.jsp" class="btn btn-secondary">행사 목록 &raquo;</a>
 				</p>
+				<%
+				// 관리자에게만 수정·삭제 버튼을 보여 준다 (처리 화면에서도 adminCheck.jsp 로 다시 확인한다)
+				if ("ADMIN".equals(session.getAttribute("loginRole"))) {
+				%>
+				<div class="d-flex gap-2 border-top pt-3">
+					<a href="./eventForm.jsp?id=<%=event.getEventId()%>" class="btn btn-outline-primary">수정</a>
+					<form action="./processDeleteEvent.jsp" method="post"
+						onsubmit="return confirm('이 행사를 삭제할까요?\n참석 신청 <%=event.getAppliedCount()%>건도 함께 삭제되며 되돌릴 수 없습니다.')">
+						<input type="hidden" name="eventId" value="<%=event.getEventId()%>">
+						<button type="submit" class="btn btn-outline-danger">삭제</button>
+					</form>
+				</div>
+				<%
+				}
+				%>
 			</div>
 		</div>
 

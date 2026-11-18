@@ -22,6 +22,13 @@ boolean menuIsAdmin = "ADMIN".equals(session.getAttribute("loginRole"));
 		<%
 		} else {
 		%>
+		<%
+		if (menuIsAdmin) {
+		%>
+		<li class="nav-item"><a href="./eventForm.jsp" class="nav-link">행사 등록</a></li>
+		<%
+		}
+		%>
 		<li class="nav-item"><a href="./myPage.jsp" class="nav-link">
 			<%=util.HtmlUtil.escape(menuLoginName)%>님
 			<%

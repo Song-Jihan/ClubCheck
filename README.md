@@ -2,10 +2,11 @@
 
 JSP 기초 기술만으로 만든 동아리 행사 등록·참석 신청·출석 관리 웹 애플리케이션입니다.
 
-> 현재 구현 단계: **P1 (회원가입·로그인·로그아웃, 세션 권한 확인, 아이디 저장 쿠키)**
+> 현재 구현 단계: **P2 (행사 등록·수정·삭제, 포스터 업로드)**
 >
 > - P0: DB 스키마, 공통 뼈대, 행사 목록·상세 조회
-> - P1: 회원 기능
+> - P1: 회원 기능 (가입, 로그인, 세션, 아이디 저장 쿠키)
+> - P2: 행사 관리 (관리자 전용, cos 로 포스터 업로드)
 
 ## 실행 환경
 
@@ -64,6 +65,17 @@ JSP 기초 기술만으로 만든 동아리 행사 등록·참석 신청·출석
 | 로그아웃 | `logout.jsp` | `session.invalidate()` |
 | 내 정보 | `myPage.jsp` | 로그인 확인 `loginCheck.jsp` |
 | 관리자 확인 | `adminCheck.jsp` | 관리자 화면 맨 위에 include |
+| 행사 등록·수정 | `eventForm.jsp` → `processEvent.jsp` | 파일 업로드(`cos2.jar` `MultipartRequest`), `jsp:useBean`·`jsp:setProperty`, 서버 검사(`EventValidator`) |
+| 행사 삭제 | `event.jsp` → `processDeleteEvent.jsp` | POST 전용, 삭제 확인창, 참석 신청 함께 삭제(ON DELETE CASCADE) |
+
+### 포스터 업로드 처리
+
+1. 업로드 파일은 웹 폴더 밖의 임시 폴더(`java.io.tmpdir/clubcheck-upload`)에 **임시 이름**으로 먼저 저장합니다. 사용자가 보낸 파일 이름은 디스크에 쓰지 않습니다.
+2. 파일 크기(5MB 이하)와 파일 앞부분(매직 넘버)으로 실제 JPG·PNG·GIF·WEBP 이미지인지 확인합니다.
+3. 통과하면 `upload_날짜_임의값.확장자`로 이름을 바꿔 `resources/images`로 옮깁니다.
+4. 포스터를 바꾸거나 행사를 지우면 예전 업로드 파일도 지웁니다. 시드 이미지(`seed_*.jpg`)는 지우지 않습니다.
+
+업로드된 포스터(`upload_*`)는 `.gitignore`에 등록되어 저장소에 올라가지 않습니다.
 
 ## 디렉터리 구조
 
@@ -74,7 +86,7 @@ ClubCheck
 │  ├─ db.properties.example  DB 접속 정보 양식 (복사해서 db.properties로 사용)
 │  ├─ dao/                   EventDAO, MemberDAO (테이블 접근)
 │  ├─ dto/                   Event, Member (자바빈)
-│  └─ util/                  DB 연결, 출력 도우미, 회원가입 검사
+│  └─ util/                  DB 연결, 출력 도우미, 입력 검사, 포스터 업로드
 └─ src/main/webapp
    ├─ events.jsp             행사 목록 (첫 화면)
    ├─ event.jsp              행사 상세
@@ -83,6 +95,8 @@ ClubCheck
    ├─ loginCheck.jsp         로그인 확인 (include 용)
    ├─ adminCheck.jsp         관리자 확인 (include 용)
    ├─ message.jsp            안내 문구 (include 용)
+   ├─ eventForm.jsp          행사 등록·수정 (processEvent.jsp 가 처리)
+   ├─ processDeleteEvent.jsp 행사 삭제
    ├─ menu.jsp, footer.jsp   공통 메뉴와 푸터
    ├─ resources/             CSS, JS(유효성 검사), 포스터 이미지
    └─ WEB-INF/               web.xml, 라이브러리

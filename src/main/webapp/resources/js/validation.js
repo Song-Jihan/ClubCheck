@@ -67,3 +67,71 @@ function checkLogin() {
 	}
 	return true;
 }
+
+// 행사 등록·수정 폼: <form name="eventForm" onsubmit="return checkEvent()">
+// 서버도 util/EventValidator.java, util/PosterUtil.java 에서 같은 규칙으로 다시 검사한다.
+function checkEvent() {
+	var form = document.eventForm.elements;
+	var title = form["title"];
+	var eventDate = form["eventDate"];
+	var location = form["location"];
+	var capacity = form["capacity"];
+	var description = form["description"];
+	var poster = form["poster"];
+
+	title.value = title.value.trim();
+	location.value = location.value.trim();
+
+	if (title.value === "" || title.value.length > 100) {
+		alert("[행사 이름]\n1~100자로 입력하세요.");
+		title.focus();
+		return false;
+	}
+	if (eventDate.value === "") {
+		alert("[일시]\n행사 일시를 선택하세요.");
+		eventDate.focus();
+		return false;
+	}
+	// 새 행사(min 속성이 있는 경우)는 지금 이후만 가능하다
+	if (eventDate.min && new Date(eventDate.value) <= new Date()) {
+		alert("[일시]\n현재 시각 이후로 선택하세요.");
+		eventDate.focus();
+		return false;
+	}
+	if (location.value === "" || location.value.length > 100) {
+		alert("[장소]\n1~100자로 입력하세요.");
+		location.focus();
+		return false;
+	}
+	if (!check(/^[0-9]{1,3}$/, capacity, "[정원]\n1~500 사이의 숫자를 입력하세요."))
+		return false;
+	var cap = parseInt(capacity.value, 10);
+	var applied = parseInt(capacity.getAttribute("data-applied") || "0", 10);
+	if (cap < 1 || cap > 500) {
+		alert("[정원]\n1~500 사이의 숫자를 입력하세요.");
+		capacity.focus();
+		return false;
+	}
+	if (cap < applied) {
+		alert("[정원]\n이미 " + applied + "명이 신청했으므로 그보다 줄일 수 없습니다.");
+		capacity.focus();
+		return false;
+	}
+	if (description.value.length > 2000) {
+		alert("[설명]\n2000자 이하로 입력하세요.");
+		description.focus();
+		return false;
+	}
+	if (poster.files && poster.files.length > 0) {
+		var file = poster.files[0];
+		if (!/\.(jpe?g|png|gif|webp)$/i.test(file.name)) {
+			alert("[포스터]\nJPG, PNG, GIF, WEBP 이미지만 올릴 수 있습니다.");
+			return false;
+		}
+		if (file.size > 5 * 1024 * 1024) {
+			alert("[포스터]\n5MB 이하의 파일만 올릴 수 있습니다.");
+			return false;
+		}
+	}
+	return true;
+}

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 import dto.Event;
@@ -40,6 +41,55 @@ public class EventDAO {
 				return null;
 			}
 		}
+	}
+
+	/** 새 행사를 저장하고, DB 가 만들어 준 행사 번호를 돌려준다. */
+	public int insert(Event event) throws SQLException {
+		String sql = "INSERT INTO club_event (title, description, event_date, location, capacity, poster_filename) "
+				+ "VALUES (?, ?, ?, ?, ?, ?)";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+			setFields(pstmt, event);
+			pstmt.executeUpdate();
+			try (ResultSet keys = pstmt.getGeneratedKeys()) {
+				if (keys.next()) {
+					return keys.getInt(1);
+				}
+			}
+			throw new SQLException("새 행사 번호를 받지 못했습니다.");
+		}
+	}
+
+	/** 행사 정보를 수정한다. 수정된 행이 있으면 true. */
+	public boolean update(Event event) throws SQLException {
+		String sql = "UPDATE club_event SET title = ?, description = ?, event_date = ?, location = ?, "
+				+ "capacity = ?, poster_filename = ? WHERE event_id = ?";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			setFields(pstmt, event);
+			pstmt.setInt(7, event.getEventId());
+			return pstmt.executeUpdate() == 1;
+		}
+	}
+
+	/** 행사를 삭제한다. 그 행사의 참석 신청(attendance)은 외래키 ON DELETE CASCADE 로 함께 지워진다. */
+	public boolean delete(int eventId) throws SQLException {
+		String sql = "DELETE FROM club_event WHERE event_id = ?";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, eventId);
+			return pstmt.executeUpdate() == 1;
+		}
+	}
+
+	/** insert 와 update 가 함께 쓰는 1~6번 물음표 채우기 */
+	private void setFields(PreparedStatement pstmt, Event event) throws SQLException {
+		pstmt.setString(1, event.getTitle());
+		pstmt.setString(2, event.getDescription());
+		pstmt.setTimestamp(3, event.getEventDate());
+		pstmt.setString(4, event.getLocation());
+		pstmt.setInt(5, event.getCapacity());
+		pstmt.setString(6, event.getPosterFilename());
 	}
 
 	private ArrayList<Event> selectList(String sql) throws SQLException {

@@ -26,6 +26,25 @@ if (flashCode != null) {
 		flashText = "관리자만 사용할 수 있는 기능입니다.";
 		flashType = "danger";
 		break;
+	case "eventAdded":
+		flashText = "행사가 등록되었습니다.";
+		flashType = "success";
+		break;
+	case "eventUpdated":
+		flashText = "행사 정보가 수정되었습니다.";
+		flashType = "success";
+		break;
+	case "eventDeleted":
+		flashText = "행사가 삭제되었습니다.";
+		break;
+	case "notFound":
+		flashText = "해당 행사를 찾을 수 없습니다.";
+		flashType = "warning";
+		break;
+	case "uploadFail":
+		flashText = "업로드한 파일이 너무 커서 처리하지 못했습니다. 포스터는 5MB 이하로 올려 주세요.";
+		flashType = "danger";
+		break;
 	default:
 		flashText = null;
 	}

@@ -3,3 +3,6 @@
 
 # Eclipse 빌드 결과물 (컴파일된 클래스에 접속 정보가 그대로 남을 수 있다)
 /build/
+
+# 실행 중에 관리자가 올린 포스터 (시드 이미지 seed_*.jpg 는 저장소에 포함)
+/src/main/webapp/resources/images/upload_*

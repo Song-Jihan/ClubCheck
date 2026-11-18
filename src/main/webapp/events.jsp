@@ -36,6 +36,13 @@
 			<div class="container-fluid py-3">
 				<h1 class="display-6 fw-bold">행사 목록</h1>
 				<p class="col-md-8 fs-5 mb-0">동아리 행사를 확인하고 참석을 신청하세요.</p>
+				<%
+				if ("ADMIN".equals(session.getAttribute("loginRole"))) {
+				%>
+				<a href="./eventForm.jsp" class="btn btn-primary mt-3">+ 새 행사 등록</a>
+				<%
+				}
+				%>
 			</div>
 		</div>
 
