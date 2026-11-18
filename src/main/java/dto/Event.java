@@ -28,6 +28,15 @@ public class Event implements Serializable {
 		return eventDate != null && eventDate.getTime() < System.currentTimeMillis();
 	}
 
+	/** 출석 체크를 할 수 있으면 true. 행사 당일 0시부터 가능하다. */
+	public boolean isCheckOpen() {
+		if (eventDate == null) {
+			return false;
+		}
+		java.time.LocalDateTime dayStart = eventDate.toLocalDateTime().toLocalDate().atStartOfDay();
+		return !java.time.LocalDateTime.now().isBefore(dayStart);
+	}
+
 	/** 신청 인원이 정원에 도달했으면 true. */
 	public boolean isFull() {
 		return appliedCount >= capacity;

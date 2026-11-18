@@ -41,6 +41,36 @@ if (flashCode != null) {
 		flashText = "해당 행사를 찾을 수 없습니다.";
 		flashType = "warning";
 		break;
+	case "applied":
+		flashText = "참석 신청이 완료되었습니다.";
+		flashType = "success";
+		break;
+	case "applyFull":
+		flashText = "정원이 마감되어 신청할 수 없습니다.";
+		flashType = "warning";
+		break;
+	case "applyClosed":
+		flashText = "이미 시작했거나 끝난 행사는 신청할 수 없습니다.";
+		flashType = "warning";
+		break;
+	case "applyAlready":
+		flashText = "이미 신청한 행사입니다.";
+		break;
+	case "cancelled":
+		flashText = "참석 신청을 취소했습니다.";
+		break;
+	case "cancelFail":
+		flashText = "취소할 수 없습니다. 행사가 이미 시작했거나 출석 처리가 끝났습니다.";
+		flashType = "warning";
+		break;
+	case "attendanceSaved":
+		flashText = "출석 상태를 저장했습니다.";
+		flashType = "success";
+		break;
+	case "checkNotOpen":
+		flashText = "출석 체크는 행사 당일부터 할 수 있습니다.";
+		flashType = "warning";
+		break;
 	case "uploadFail":
 		flashText = "업로드한 파일이 너무 커서 처리하지 못했습니다. 포스터는 5MB 이하로 올려 주세요.";
 		flashType = "danger";

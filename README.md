@@ -2,11 +2,12 @@
 
 JSP 기초 기술만으로 만든 동아리 행사 등록·참석 신청·출석 관리 웹 애플리케이션입니다.
 
-> 현재 구현 단계: **P2 (행사 등록·수정·삭제, 포스터 업로드)**
+> 현재 구현 단계: **P3 (참석 신청·취소, 출석 체크, 내 참석 기록)**
 >
 > - P0: DB 스키마, 공통 뼈대, 행사 목록·상세 조회
 > - P1: 회원 기능 (가입, 로그인, 세션, 아이디 저장 쿠키)
 > - P2: 행사 관리 (관리자 전용, cos 로 포스터 업로드)
+> - P3: 참석 신청·취소, 관리자 출석 체크, 내 참석 기록·출석률
 
 ## 실행 환경
 
@@ -67,6 +68,15 @@ JSP 기초 기술만으로 만든 동아리 행사 등록·참석 신청·출석
 | 관리자 확인 | `adminCheck.jsp` | 관리자 화면 맨 위에 include |
 | 행사 등록·수정 | `eventForm.jsp` → `processEvent.jsp` | 파일 업로드(`cos2.jar` `MultipartRequest`), `jsp:useBean`·`jsp:setProperty`, 서버 검사(`EventValidator`) |
 | 행사 삭제 | `event.jsp` → `processDeleteEvent.jsp` | POST 전용, 삭제 확인창, 참석 신청 함께 삭제(ON DELETE CASCADE) |
+| 참석 신청·취소 | `event.jsp` → `processApply.jsp`, `processCancel.jsp` | 세션의 회원 아이디 사용, 트랜잭션 + `SELECT ... FOR UPDATE`로 정원 초과 방지 |
+| 출석 체크 | `checkAttendance.jsp` → `processCheckAttendance.jsp` | 관리자 전용, 행사 당일부터, 여러 명을 한 번에 저장(트랜잭션) |
+| 내 참석 기록 | `myPage.jsp` | JOIN 조회, 출석률(출석 ÷ 출석 처리된 행사), div 너비로 그린 막대 |
+
+### 참석 신청 규칙
+
+- 신청과 취소는 행사 시작 전까지만 가능합니다. 출석 처리가 끝난 신청은 취소할 수 없습니다.
+- 정원 확인과 저장을 하나의 트랜잭션으로 묶고 행사 행을 잠가서, 마지막 자리에 동시에 신청해도 한 명만 성공합니다.
+- 출석 체크는 행사 당일 0시부터 열립니다. 상태는 미처리(APPLIED) → 출석(PRESENT) 또는 결석(ABSENT)입니다.
 
 ### 포스터 업로드 처리
 
@@ -84,8 +94,8 @@ ClubCheck
 ├─ sql/                      DB 스키마와 시드 데이터
 ├─ src/main/java
 │  ├─ db.properties.example  DB 접속 정보 양식 (복사해서 db.properties로 사용)
-│  ├─ dao/                   EventDAO, MemberDAO (테이블 접근)
-│  ├─ dto/                   Event, Member (자바빈)
+│  ├─ dao/                   EventDAO, MemberDAO, AttendanceDAO (테이블 접근)
+│  ├─ dto/                   Event, Member, Attendance (자바빈)
 │  └─ util/                  DB 연결, 출력 도우미, 입력 검사, 포스터 업로드
 └─ src/main/webapp
    ├─ events.jsp             행사 목록 (첫 화면)
@@ -97,6 +107,8 @@ ClubCheck
    ├─ message.jsp            안내 문구 (include 용)
    ├─ eventForm.jsp          행사 등록·수정 (processEvent.jsp 가 처리)
    ├─ processDeleteEvent.jsp 행사 삭제
+   ├─ processApply.jsp       참석 신청 (processCancel.jsp: 취소)
+   ├─ checkAttendance.jsp    출석 체크 (processCheckAttendance.jsp 가 저장)
    ├─ menu.jsp, footer.jsp   공통 메뉴와 푸터
    ├─ resources/             CSS, JS(유효성 검사), 포스터 이미지
    └─ WEB-INF/               web.xml, 라이브러리
