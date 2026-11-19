@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" errorPage="error500.jsp"%>
+<%@ page import="java.util.HashSet"%>
 <%@ page import="java.util.LinkedHashMap"%>
 <%@ page import="dto.Event"%>
 <%@ page import="dto.Attendance"%>
@@ -28,18 +29,31 @@
 		return;
 	}
 
+	// 정기세미나는 출석 기록이 없는 회원도 저장 대상이다. 가입한 회원 아이디만 받도록 명단을 미리 만든다
+	HashSet<String> rosterIds = null;
+	if (event.isSeminar()) {
+		rosterIds = new HashSet<String>();
+		for (Attendance a : attendanceDAO.getSeminarRoster(event.getEventId())) {
+			rosterIds.add(a.getMemberId());
+		}
+	}
+
 	// 폼에서 회원별 상태를 모은다: memberId 여러 개 + status_아이디
 	LinkedHashMap<String, String> statusByMember = new LinkedHashMap<String, String>();
 	String[] memberIds = request.getParameterValues("memberId");
 	if (memberIds != null) {
 		for (String memberId : memberIds) {
 			String status = request.getParameter("status_" + memberId);
+			if (rosterIds != null && !rosterIds.contains(memberId)) {
+				continue;
+			}
 			if (Attendance.isValidStatus(status)) {
 				statusByMember.put(memberId, status);
 			}
 		}
 	}
 
-	attendanceDAO.updateStatuses(event.getEventId(), statusByMember);
+	// 대외활동은 신청한 사람의 행만 바꾸고, 정기세미나는 기록이 없으면 새로 넣는다
+	attendanceDAO.updateStatuses(event.getEventId(), statusByMember, event.isSeminar());
 	response.sendRedirect("checkAttendance.jsp?id=" + event.getEventId() + "&msg=attendanceSaved");
 %>

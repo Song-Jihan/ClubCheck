@@ -13,9 +13,10 @@ import util.DBConnection;
 public class EventDAO {
 
 	// 행사 정보와 함께 현재 신청 인원(applied_count)을 같이 조회한다
-	private static final String SELECT_EVENT = "SELECT e.event_id, e.title, e.description, e.event_date, "
+	// 신청 인원에는 대외활동의 '미참여'(DECLINED) 응답을 넣지 않는다
+	private static final String SELECT_EVENT = "SELECT e.event_id, e.title, e.event_type, e.description, e.event_date, "
 			+ "e.location, e.capacity, e.poster_filename, "
-			+ "(SELECT COUNT(*) FROM attendance a WHERE a.event_id = e.event_id) AS applied_count "
+			+ "(SELECT COUNT(*) FROM attendance a WHERE a.event_id = e.event_id AND a.status <> 'DECLINED') AS applied_count "
 			+ "FROM club_event e ";
 
 	/** 아직 시작하지 않은 행사를 가까운 날짜순으로 조회한다. */
@@ -50,11 +51,12 @@ public class EventDAO {
 
 	/** 새 행사를 저장하고, DB 가 만들어 준 행사 번호를 돌려준다. */
 	public int insert(Event event) throws SQLException {
-		String sql = "INSERT INTO club_event (title, description, event_date, location, capacity, poster_filename) "
-				+ "VALUES (?, ?, ?, ?, ?, ?)";
+		String sql = "INSERT INTO club_event (title, description, event_date, location, capacity, poster_filename, event_type) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?)";
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 			setFields(pstmt, event);
+			pstmt.setString(7, event.getEventType());
 			pstmt.executeUpdate();
 			try (ResultSet keys = pstmt.getGeneratedKeys()) {
 				if (keys.next()) {
@@ -65,7 +67,7 @@ public class EventDAO {
 		}
 	}
 
-	/** 행사 정보를 수정한다. 수정된 행이 있으면 true. */
+	/** 행사 정보를 수정한다. 행사 종류(event_type)는 만든 뒤에 바꾸지 않는다. 수정된 행이 있으면 true. */
 	public boolean update(Event event) throws SQLException {
 		String sql = "UPDATE club_event SET title = ?, description = ?, event_date = ?, location = ?, "
 				+ "capacity = ?, poster_filename = ? WHERE event_id = ?";
@@ -114,6 +116,7 @@ public class EventDAO {
 		Event event = new Event();
 		event.setEventId(rs.getInt("event_id"));
 		event.setTitle(rs.getString("title"));
+		event.setEventType(rs.getString("event_type"));
 		event.setDescription(rs.getString("description"));
 		event.setEventDate(rs.getTimestamp("event_date"));
 		event.setLocation(rs.getString("location"));

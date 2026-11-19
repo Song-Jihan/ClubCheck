@@ -3,7 +3,7 @@
 <%@ include file="loginCheck.jsp"%>
 <jsp:useBean id="attendanceDAO" class="dao.AttendanceDAO" scope="page" />
 <%
-	// 참석 신청 (로그인한 회원, POST 전용)
+	// 대외활동 참여 신청 (로그인한 회원, POST 전용). 미참여로 응답했던 회원은 참여로 바뀐다
 	if (!"POST".equals(request.getMethod())) {
 		response.sendRedirect("events.jsp");
 		return;
@@ -33,6 +33,9 @@
 		break;
 	case ALREADY:
 		msg = "applyAlready";
+		break;
+	case SEMINAR:
+		msg = "seminarNoApply";
 		break;
 	default:
 		response.sendRedirect("events.jsp?msg=notFound");

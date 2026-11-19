@@ -7,10 +7,18 @@
 <%@ include file="locale.jsp"%>
 <jsp:useBean id="eventDAO" class="dao.EventDAO" scope="page" />
 <%!
-	// 선언문 태그: 행사 상태(종료 / 정원 마감 / 모집 중)에 맞는 배지를 만든다
+	// 선언문 태그: 행사 종류(정기세미나 / 대외활동)와 상태(종료 / 정원 마감 / 모집 중) 배지를 만든다
+	private String typeBadge(PageContext pc, Event event) {
+		String color = event.isSeminar() ? "text-bg-primary" : "text-bg-info";
+		return "<span class=\"badge " + color + "\">" + msg(pc, "type." + event.getEventType()) + "</span> ";
+	}
+
 	private String statusBadge(PageContext pc, Event event) {
 		if (event.isPast()) {
 			return "<span class=\"badge text-bg-secondary\">" + msg(pc, "status.closed") + "</span>";
+		}
+		if (event.isSeminar()) {
+			return "";   // 정기세미나는 모집(신청)이 없다
 		}
 		if (event.isFull()) {
 			return "<span class=\"badge text-bg-danger\">" + msg(pc, "status.full") + "</span>";
@@ -83,12 +91,22 @@
 						class="card-img-top" alt="<fmt:message key="poster.alt" />"
 						style="height: 280px; object-fit: cover;">
 					<div class="card-body">
-						<p class="mb-2"><%=statusBadge(pageContext, event)%></p>
+						<p class="mb-2"><%=typeBadge(pageContext, event)%><%=statusBadge(pageContext, event)%></p>
 						<h5 class="card-title"><%=HtmlUtil.escape(event.getTitle())%></h5>
 						<p class="card-text mb-1"><%=DateUtil.format(event.getEventDate(), lang)%></p>
 						<p class="card-text mb-1"><%=HtmlUtil.escape(event.getLocation())%></p>
 						<p class="card-text text-secondary">
+							<%
+							if (event.isSeminar()) {
+							%>
+							<fmt:message key="events.seminarAll" />
+							<%
+							} else {
+							%>
 							<fmt:message key="events.applied"><fmt:param value="<%=applied%>" /><fmt:param value="<%=capacity%>" /></fmt:message>
+							<%
+							}
+							%>
 						</p>
 					</div>
 					<div class="card-footer bg-transparent border-0 pb-3">

@@ -18,6 +18,10 @@
 		"event.capacityApplied": "<fmt:message key="js.event.capacityApplied"/>",
 		"event.description": "<fmt:message key="js.event.description"/>",
 		"event.posterType": "<fmt:message key="js.event.posterType"/>",
-		"event.posterSize": "<fmt:message key="js.event.posterSize"/>"
+		"event.posterSize": "<fmt:message key="js.event.posterSize"/>",
+		"absence.title": "<fmt:message key="js.absence.title"/>",
+		"absence.reason": "<fmt:message key="js.absence.reason"/>",
+		"absence.evidenceType": "<fmt:message key="js.absence.evidenceType"/>",
+		"absence.evidenceSize": "<fmt:message key="js.absence.evidenceSize"/>"
 	};
 </script>

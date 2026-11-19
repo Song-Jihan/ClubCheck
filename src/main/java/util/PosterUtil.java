@@ -45,6 +45,14 @@ public class PosterUtil {
 		return "tmp_" + UUID.randomUUID().toString().replace("-", "") + ".part";
 	}
 
+	/** 폴더가 없으면 만든다 (결석사유서 증빙 폴더 WEB-INF/evidence 처럼 처음에는 없을 수 있는 폴더). */
+	public static void ensureDir(String dir) throws IOException {
+		File folder = new File(dir);
+		if (!folder.isDirectory() && !folder.mkdirs()) {
+			throw new IOException("폴더를 만들 수 없습니다: " + dir);
+		}
+	}
+
 	/** 파일 앞부분을 보고 이미지 종류(jpg, png, gif, webp)를 알아낸다. 이미지가 아니면 null. */
 	public static String detectImageType(File file) throws IOException {
 		byte[] h = new byte[12];

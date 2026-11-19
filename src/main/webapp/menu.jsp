@@ -37,6 +37,7 @@ String menuEnUrl = util.HtmlUtil.escape(util.LangUtil.switchUrl(menuUri, menuQue
 		%>
 		<li class="nav-item"><a href="<%=menuCtx%>/eventForm.jsp" class="nav-link"><fmt:message key="menu.addEvent" /></a></li>
 		<li class="nav-item"><a href="<%=menuCtx%>/members.jsp" class="nav-link"><fmt:message key="menu.members" /></a></li>
+		<li class="nav-item"><a href="<%=menuCtx%>/absenceReports.jsp" class="nav-link"><fmt:message key="menu.reports" /></a></li>
 		<%
 			}
 			String menuUserName = util.HtmlUtil.escape(menuLoginName);

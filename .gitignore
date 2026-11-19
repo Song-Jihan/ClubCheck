@@ -6,3 +6,6 @@
 
 # 실행 중에 관리자가 올린 포스터 (시드 이미지 seed_*.jpg 는 저장소에 포함)
 /src/main/webapp/resources/images/upload_*
+
+# 결석사유서 증빙자료 (회원이 올린 이미지)
+/src/main/webapp/WEB-INF/evidence/

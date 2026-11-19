@@ -48,6 +48,8 @@
 	String minDate = isEdit ? "" : DateUtil.toInputValue(new java.sql.Timestamp(System.currentTimeMillis()));
 	// 수정할 때 정원은 현재 신청 인원보다 작을 수 없다
 	int minCapacity = Math.max(EventValidator.CAPACITY_MIN, formEvent.getAppliedCount());
+	boolean isSeminar = formEvent.isSeminar();
+	String typeKey = "type." + formEvent.getEventType();
 %>
 
 <!DOCTYPE html>
@@ -80,6 +82,34 @@
 					enctype="multipart/form-data" onsubmit="return checkEvent()">
 					<input type="hidden" name="eventId" value="<%=formEvent.getEventId()%>">
 
+					<%-- 행사 종류: 등록할 때만 고른다. 정기세미나를 고르면 정원 칸을 숨긴다 (validation.js 의 toggleEventType) --%>
+					<div class="mb-3">
+						<label class="form-label d-block"><fmt:message key="form.type" /></label>
+						<%
+						if (isEdit) {
+						%>
+						<span class="badge <%=isSeminar ? "text-bg-primary" : "text-bg-info"%>"><fmt:message key="<%=typeKey%>" /></span>
+						<span class="form-text ms-2"><fmt:message key="form.typeFixed" /></span>
+						<%
+						} else {
+						%>
+						<div class="form-check">
+							<input type="radio" id="typeSeminar" name="eventType" value="SEMINAR" class="form-check-input"
+								onclick="toggleEventType()" <%=isSeminar ? "checked" : ""%>>
+							<label for="typeSeminar" class="form-check-label"><fmt:message key="type.SEMINAR" />
+								<span class="text-secondary small">· <fmt:message key="form.typeSeminarHelp" /></span></label>
+						</div>
+						<div class="form-check">
+							<input type="radio" id="typeActivity" name="eventType" value="ACTIVITY" class="form-check-input"
+								onclick="toggleEventType()" <%=isSeminar ? "" : "checked"%>>
+							<label for="typeActivity" class="form-check-label"><fmt:message key="type.ACTIVITY" />
+								<span class="text-secondary small">· <fmt:message key="form.typeActivityHelp" /></span></label>
+						</div>
+						<%
+						}
+						%>
+					</div>
+
 					<div class="mb-3">
 						<label for="title" class="form-label"><fmt:message key="form.title" /></label>
 						<input type="text" id="title" name="title" class="form-control"
@@ -93,12 +123,13 @@
 								class="form-control" value="<%=HtmlUtil.escape(dateValue)%>"
 								<%=minDate.isEmpty() ? "" : "min=\"" + minDate + "\""%>>
 						</div>
-						<div class="col-md-6 mb-3">
+						<div class="col-md-6 mb-3" id="capacityGroup" <%=isSeminar ? "style=\"display: none;\"" : ""%>>
 							<label for="capacity" class="form-label"><fmt:message key="form.capacity" /></label>
+							<%-- 정기세미나는 disabled 로 두어 값을 보내지 않는다 (서버가 정원을 정한다) --%>
 							<input type="number" id="capacity" name="capacity" class="form-control"
 								min="<%=minCapacity%>" max="<%=EventValidator.CAPACITY_MAX%>"
 								data-applied="<%=formEvent.getAppliedCount()%>"
-								value="<%=HtmlUtil.escape(capacityValue)%>">
+								value="<%=HtmlUtil.escape(capacityValue)%>" <%=isSeminar ? "disabled" : ""%>>
 							<%
 							if (isEdit) {
 							%>

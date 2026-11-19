@@ -33,7 +33,13 @@
 		return;
 	}
 
-	ArrayList<Attendance> attendees = attendanceDAO.getAttendees(event.getEventId());
+	// 정기세미나: 가입한 회원 전원 / 대외활동: 참여를 신청한 사람 (+ 미참여 응답자는 아래에 따로 보여 준다)
+	boolean seminar = event.isSeminar();
+	ArrayList<Attendance> attendees = seminar ? attendanceDAO.getSeminarRoster(event.getEventId())
+			: attendanceDAO.getAttendees(event.getEventId());
+	ArrayList<Attendance> declined = seminar ? new ArrayList<Attendance>() : attendanceDAO.getDeclined(event.getEventId());
+	int declinedCount = declined.size();
+	String typeKey = "type." + event.getEventType();
 	boolean checkOpen = event.isCheckOpen();
 
 	int present = 0, absent = 0, waiting = 0;
@@ -68,19 +74,35 @@
 		<div class="p-5 mb-4 bg-body-tertiary rounded-3">
 			<div class="container-fluid py-3">
 				<h1 class="display-6 fw-bold"><fmt:message key="check.pageTitle" /></h1>
-				<p class="fs-5 mb-0"><%=HtmlUtil.escape(event.getTitle())%>
+				<p class="fs-5 mb-0"><span class="badge <%=seminar ? "text-bg-primary" : "text-bg-info"%> fs-6"><fmt:message key="<%=typeKey%>" /></span>
+					<%=HtmlUtil.escape(event.getTitle())%>
 					<span class="text-secondary fs-6">· <%=DateUtil.format(event.getEventDate(), lang)%></span></p>
 			</div>
 		</div>
 
 		<div class="d-flex flex-wrap gap-2 mb-3">
+			<%
+			if (seminar) {
+			%>
+			<span class="badge text-bg-light border fs-6"><fmt:message key="check.target"><fmt:param value="<%=attendeeCount%>" /></fmt:message></span>
+			<%
+			} else {
+			%>
 			<span class="badge text-bg-light border fs-6"><fmt:message key="check.applied"><fmt:param value="<%=attendeeCount%>" /><fmt:param value="<%=capacity%>" /></fmt:message></span>
+			<%
+			}
+			%>
 			<span class="badge text-bg-success fs-6"><fmt:message key="check.present"><fmt:param value="<%=present%>" /></fmt:message></span>
 			<span class="badge text-bg-danger fs-6"><fmt:message key="check.absent"><fmt:param value="<%=absent%>" /></fmt:message></span>
 			<span class="badge text-bg-secondary fs-6"><fmt:message key="check.waiting"><fmt:param value="<%=waiting%>" /></fmt:message></span>
 		</div>
 
 		<%
+		if (seminar) {
+		%>
+		<p class="text-secondary"><fmt:message key="check.seminarRoster" /></p>
+		<%
+		}
 		if (!checkOpen) {
 		%>
 		<div class="alert alert-info"><fmt:message key="check.notOpen" /></div>
@@ -100,9 +122,22 @@
 						<th scope="col">#</th>
 						<th scope="col"><fmt:message key="check.colName" /></th>
 						<th scope="col"><fmt:message key="check.colStudentNo" /></th>
+						<%
+						if (!seminar) {
+						%>
 						<th scope="col"><fmt:message key="check.colAppliedAt" /></th>
+						<%
+						}
+						%>
 						<th scope="col"><fmt:message key="check.colStatus" /></th>
 						<th scope="col"><fmt:message key="check.colCheckedAt" /></th>
+						<%
+						if (seminar) {
+						%>
+						<th scope="col"><fmt:message key="check.colReport" /></th>
+						<%
+						}
+						%>
 					</tr>
 				</thead>
 				<tbody>
@@ -115,7 +150,13 @@
 						<td><%=HtmlUtil.escape(a.getMemberName())%>
 							<input type="hidden" name="memberId" value="<%=HtmlUtil.escape(a.getMemberId())%>"></td>
 						<td><%=HtmlUtil.escape(a.getStudentNo())%></td>
+						<%
+						if (!seminar) {
+						%>
 						<td><%=DateUtil.format(a.getAppliedAt(), lang)%></td>
+						<%
+						}
+						%>
 						<td>
 							<div class="btn-group" role="group">
 								<%=statusRadio(a, Attendance.APPLIED, labelApplied, "secondary", !checkOpen)%>
@@ -124,6 +165,21 @@
 							</div>
 						</td>
 						<td class="text-secondary"><%=DateUtil.format(a.getCheckedAt(), lang)%></td>
+						<%
+						if (seminar) {
+						%>
+						<td>
+							<%
+							if (a.getReportId() > 0) {
+							%>
+							<a href="./absenceReport.jsp?id=<%=a.getReportId()%>" class="btn btn-outline-primary btn-sm"><fmt:message key="check.reportView" /></a>
+							<%
+							}
+							%>
+						</td>
+						<%
+						}
+						%>
 					</tr>
 					<%
 					}
@@ -141,6 +197,21 @@
 			}
 			%>
 		</form>
+		<%
+		}
+		// 대외활동에 '미참여'로 응답한 사람 (출석 체크 대상이 아니므로 이름만 보여 준다)
+		if (!declined.isEmpty()) {
+		%>
+		<h2 class="h6 mt-4"><fmt:message key="check.declinedTitle"><fmt:param value="<%=declinedCount%>" /></fmt:message></h2>
+		<ul class="list-inline text-secondary">
+			<%
+			for (Attendance d : declined) {
+			%>
+			<li class="list-inline-item"><%=HtmlUtil.escape(d.getMemberName())%> (<%=HtmlUtil.escape(d.getStudentNo())%>)</li>
+			<%
+			}
+			%>
+		</ul>
 		<%
 		}
 		%>

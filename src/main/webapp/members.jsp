@@ -25,6 +25,10 @@
 			return "<td class=\"text-secondary small\" title=\"" + msg(pc, "members.cell.pendingTitle") + "\">"
 					+ msg(pc, "members.cell.pending") + "</td>";
 		}
+		if (Attendance.DECLINED.equals(status)) {
+			return "<td class=\"text-secondary small\" title=\"" + msg(pc, "members.cell.declinedTitle") + "\">"
+					+ msg(pc, "members.cell.declined") + "</td>";
+		}
 		return "<td class=\"text-body-tertiary\" title=\"" + msg(pc, "members.cell.none") + "\">-</td>";
 	}
 %>
@@ -83,7 +87,8 @@
 		<p class="text-secondary small mb-2">
 			<span class="text-success fw-bold">○</span> <fmt:message key="members.legend.present" /> &nbsp;
 			<span class="text-danger fw-bold">✕</span> <fmt:message key="members.legend.absent" /> &nbsp;
-			<fmt:message key="members.legend.pending" /> &nbsp; <fmt:message key="members.legend.none" /> &nbsp;·&nbsp;
+			<fmt:message key="members.legend.pending" /> &nbsp; <fmt:message key="members.legend.declined" /> &nbsp;
+			<fmt:message key="members.legend.none" /> &nbsp;·&nbsp;
 			<fmt:message key="members.eventCount"><fmt:param value="<%=eventCount%>" /></fmt:message>
 		</p>
 		<%
@@ -104,7 +109,14 @@
 						%>
 						<th scope="col" title="<%=HtmlUtil.escape(e.getTitle())%>">
 							<a href="./checkAttendance.jsp?id=<%=e.getEventId()%>" class="text-decoration-none">
-								<%=headerFormat.format(e.getEventDate())%></a></th>
+								<%=headerFormat.format(e.getEventDate())%></a>
+							<%
+							if (e.isSeminar()) {
+							%>
+							<br><span class="badge text-bg-primary fw-normal"><fmt:message key="members.seminarMark" /></span>
+							<%
+							}
+							%></th>
 						<%
 						}
 						%>
@@ -123,14 +135,18 @@
 						<%
 						for (int i = 0; i < events.size(); i++) {
 							String status = statusMap.get(AttendanceDAO.statusKey(events.get(i).getEventId(), m.getId()));
+							// 정기세미나는 전원이 대상이라 기록이 없으면 '미처리'로 본다
+							if (status == null && events.get(i).isSeminar()) {
+								status = Attendance.APPLIED;
+							}
 							if (Attendance.PRESENT.equals(status)) {
 								present++;
 								presentByEvent[i]++;
 							} else if (Attendance.ABSENT.equals(status)) {
 								absent++;
 							}
-							if (status != null) {
-								appliedByEvent[i]++;
+							if (status != null && !Attendance.DECLINED.equals(status)) {
+								appliedByEvent[i]++;   // 아래 합계 행의 분모: 출석 대상 인원
 							}
 						%>
 						<%=cell(pageContext, status)%>
@@ -188,6 +204,7 @@
 					<th scope="col"><fmt:message key="members.colPresent" /></th>
 					<th scope="col"><fmt:message key="members.colAbsent" /></th>
 					<th scope="col"><fmt:message key="members.colPending" /></th>
+					<th scope="col"><fmt:message key="members.colDeclined" /></th>
 					<th scope="col" style="width: 30%;"><fmt:message key="members.colRate" /></th>
 				</tr>
 			</thead>
@@ -205,6 +222,7 @@
 					<td><%=m.getPresentCount()%></td>
 					<td class="<%=m.getAbsentCount() > 0 ? "text-danger" : ""%>"><%=m.getAbsentCount()%></td>
 					<td class="text-secondary"><%=m.getAppliedCount()%></td>
+					<td class="text-secondary"><%=m.getDeclinedCount()%></td>
 					<td>
 						<%
 						if (rate < 0) {

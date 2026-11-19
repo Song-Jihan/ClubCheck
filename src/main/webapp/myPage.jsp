@@ -27,7 +27,7 @@
 			presentCount++;
 		} else if (Attendance.ABSENT.equals(r.getStatus())) {
 			absentCount++;
-		} else if (!r.isEventPast()) {
+		} else if (!r.isEventPast() && !Attendance.DECLINED.equals(r.getStatus())) {
 			upcomingCount++;
 		}
 	}
@@ -45,6 +45,7 @@
 <body>
 	<div class="container py-4">
 		<%@ include file="menu.jsp"%>
+		<%@ include file="message.jsp"%>
 
 		<div class="p-5 mb-4 bg-body-tertiary rounded-3">
 			<div class="container-fluid py-3">
@@ -119,9 +120,11 @@
 		<table class="table align-middle">
 			<thead>
 				<tr>
+					<th scope="col"><fmt:message key="my.colType" /></th>
 					<th scope="col"><fmt:message key="my.colEvent" /></th>
 					<th scope="col"><fmt:message key="my.colDate" /></th>
 					<th scope="col"><fmt:message key="my.colStatus" /></th>
+					<th scope="col"><fmt:message key="my.colReport" /></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -132,6 +135,8 @@
 						badge = "<span class=\"badge text-bg-success\">" + msg(pageContext, "badge.present") + "</span>";
 					} else if (Attendance.ABSENT.equals(r.getStatus())) {
 						badge = "<span class=\"badge text-bg-danger\">" + msg(pageContext, "badge.absent") + "</span>";
+					} else if (Attendance.DECLINED.equals(r.getStatus())) {
+						badge = "<span class=\"badge text-bg-light border\">" + msg(pageContext, "badge.declined") + "</span>";
 					} else if (r.isEventPast()) {
 						badge = "<span class=\"badge text-bg-secondary\">" + msg(pageContext, "badge.pending") + "</span>";
 					} else {
@@ -139,9 +144,24 @@
 					}
 				%>
 				<tr>
+					<td class="small text-secondary"><%=msg(pageContext, "type." + r.getEventType())%></td>
 					<td><a href="./event.jsp?id=<%=r.getEventId()%>"><%=HtmlUtil.escape(r.getEventTitle())%></a></td>
 					<td><%=DateUtil.format(r.getEventDate(), lang)%></td>
 					<td><%=badge%></td>
+					<td>
+						<%
+						// 정기세미나에 결석한 기록: 사유서를 냈으면 '보기', 아직이면 '작성'
+						if (r.getReportId() > 0) {
+						%>
+						<a href="./absenceReport.jsp?id=<%=r.getReportId()%>" class="btn btn-outline-primary btn-sm"><fmt:message key="my.reportView" /></a>
+						<%
+						} else if (r.isReportable()) {
+						%>
+						<a href="./absenceForm.jsp?eventId=<%=r.getEventId()%>" class="btn btn-danger btn-sm"><fmt:message key="my.reportWrite" /></a>
+						<%
+						}
+						%>
+					</td>
 				</tr>
 				<%
 				}

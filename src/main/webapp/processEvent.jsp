@@ -69,6 +69,17 @@
 	description = (description == null) ? "" : description.trim();
 	location = (location == null) ? "" : location.trim();
 	capacity = (capacity == null) ? "" : capacity.trim();
+
+	// 행사 종류: 등록할 때만 고를 수 있고, 수정할 때는 원래 종류를 그대로 쓴다
+	String eventType = (original != null) ? original.getEventType() : multi.getParameter("eventType");
+	boolean typeValid = Event.SEMINAR.equals(eventType) || Event.ACTIVITY.equals(eventType);
+	if (!typeValid) {
+		eventType = Event.ACTIVITY;
+	}
+	// 정기세미나는 신청과 정원이 없다. 정원 칸은 화면에서 숨기고, DB 에는 최대값을 넣어 둔다
+	if (Event.SEMINAR.equals(eventType)) {
+		capacity = String.valueOf(EventValidator.CAPACITY_MAX);
+	}
 %>
 <%-- 액션 태그로 자바빈(Event)에 문자열 값을 채운다 --%>
 <jsp:setProperty name="event" property="title" value="<%=title%>" />
@@ -76,9 +87,13 @@
 <jsp:setProperty name="event" property="location" value="<%=location%>" />
 <%
 	event.setEventId(eventId);
+	event.setEventType(eventType);
 
 	// 2) 입력값 검사
 	ArrayList<String> errors = EventValidator.validate(title, description, eventDate, location, capacity, original);
+	if (!typeValid) {
+		errors.add(0, "err.event.type");
+	}
 
 	// 3) 포스터 검사: 크기와 파일 내용(확장자가 아니라 실제 이미지인지)
 	String imageType = null;

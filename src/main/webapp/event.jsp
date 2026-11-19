@@ -7,6 +7,7 @@
 <%@ include file="locale.jsp"%>
 <jsp:useBean id="eventDAO" class="dao.EventDAO" scope="page" />
 <jsp:useBean id="attendanceDAO" class="dao.AttendanceDAO" scope="page" />
+<jsp:useBean id="absenceReportDAO" class="dao.AbsenceReportDAO" scope="page" />
 <%
 	// id 파라미터가 없거나 숫자가 아니거나, 없는 행사 번호면 목록으로 돌려보낸다
 	Event event = null;
@@ -31,6 +32,10 @@
 	// 로그인한 회원이면 이 행사에 대한 내 신청 상태를 확인한다 (신청 안 했으면 null)
 	String loginId = (String) session.getAttribute("loginId");
 	String myStatus = (loginId != null) ? attendanceDAO.getStatus(event.getEventId(), loginId) : null;
+	// 정기세미나에 결석했으면 결석사유서를 냈는지 확인한다
+	dto.AbsenceReport myReport = (event.isSeminar() && Attendance.ABSENT.equals(myStatus))
+			? absenceReportDAO.findByEventAndMember(event.getEventId(), loginId) : null;
+	String typeKey = "type." + event.getEventType();
 %>
 <!DOCTYPE html>
 <html lang="<%=lang%>">
@@ -61,11 +66,14 @@
 					<b><%=HtmlUtil.escape(event.getTitle())%></b>
 				</h3>
 				<p>
+					<span class="badge <%=event.isSeminar() ? "text-bg-primary" : "text-bg-info"%>"><fmt:message key="<%=typeKey%>" /></span>
 					<%
 					if (event.isPast()) {
 					%>
 					<span class="badge text-bg-secondary"><fmt:message key="status.closed" /></span>
 					<%
+					} else if (event.isSeminar()) {
+						// 정기세미나는 모집(신청)이 없으므로 상태 배지를 붙이지 않는다
 					} else if (event.isFull()) {
 					%>
 					<span class="badge text-bg-danger"><fmt:message key="status.full" /></span>
@@ -86,15 +94,50 @@
 					<b><fmt:message key="event.location" /></b> :
 					<%=HtmlUtil.escape(event.getLocation())%>
 				</p>
+				<%
+				if (event.isSeminar()) {
+				%>
+				<p>
+					<b><fmt:message key="event.applied" /></b> : <fmt:message key="event.seminarTarget" />
+				</p>
+				<p class="text-secondary small"><fmt:message key="event.seminarNote" /></p>
+				<%
+				} else {
+				%>
 				<p>
 					<b><fmt:message key="event.applied" /></b> :
 					<fmt:message key="event.people"><fmt:param value="<%=applied%>" /><fmt:param value="<%=capacity%>" /></fmt:message>
 				</p>
+				<%
+				}
+				%>
 
-				<%-- 참석 신청 영역: 로그인 여부, 내 신청 상태, 행사 시작 여부, 정원에 따라 다르게 보여 준다 --%>
+				<%-- 참여 영역
+				     정기세미나: 신청 버튼 없음. 결석했으면 결석사유서 작성·보기 버튼
+				     대외활동: 참여 신청 / 미참여 응답 / 응답 바꾸기·취소 (행사 시작 전까지) --%>
 				<div class="mb-3">
 					<%
-					if (myStatus != null) {
+					if (event.isSeminar()) {
+						if (loginId != null) {
+							String seminarKey = Attendance.PRESENT.equals(myStatus) ? "event.my.present"
+									: Attendance.ABSENT.equals(myStatus) ? "event.my.absent"
+									: event.isCheckOpen() ? "event.my.notChecked" : null;
+							if (seminarKey != null) {
+					%>
+					<p class="mb-2"><b><fmt:message key="event.myStatus" /></b> : <fmt:message key="<%=seminarKey%>" /></p>
+					<%
+							}
+							if (Attendance.ABSENT.equals(myStatus)) {
+								String reportLink = (myReport != null)
+										? "./absenceReport.jsp?id=" + myReport.getReportId()
+										: "./absenceForm.jsp?eventId=" + event.getEventId();
+								String reportKey = (myReport != null) ? "my.reportView" : "my.reportWrite";
+					%>
+					<a href="<%=reportLink%>" class="btn btn-outline-primary"><fmt:message key="<%=reportKey%>" /></a>
+					<%
+							}
+						}
+					} else if (myStatus != null && !Attendance.DECLINED.equals(myStatus)) {
 						String myStatusKey = Attendance.PRESENT.equals(myStatus) ? "event.my.present"
 								: Attendance.ABSENT.equals(myStatus) ? "event.my.absent"
 								: event.isPast() ? "event.my.appliedPast" : "event.my.applied";
@@ -103,20 +146,40 @@
 					<%
 						if (Attendance.APPLIED.equals(myStatus) && !event.isPast()) {
 					%>
-					<form action="./processCancel.jsp" method="post"
-						onsubmit="return confirm('<fmt:message key="event.cancel.confirm" />')">
-						<input type="hidden" name="eventId" value="<%=event.getEventId()%>">
-						<button type="submit" class="btn btn-outline-danger"><fmt:message key="event.cancel" /></button>
-					</form>
+					<div class="d-flex gap-2">
+						<form action="./processDecline.jsp" method="post">
+							<input type="hidden" name="eventId" value="<%=event.getEventId()%>">
+							<button type="submit" class="btn btn-outline-secondary"><fmt:message key="event.toDecline" /></button>
+						</form>
+						<form action="./processCancel.jsp" method="post"
+							onsubmit="return confirm('<fmt:message key="event.cancel.confirm" />')">
+							<input type="hidden" name="eventId" value="<%=event.getEventId()%>">
+							<button type="submit" class="btn btn-outline-danger"><fmt:message key="event.cancel" /></button>
+						</form>
+					</div>
+					<%
+						}
+					} else if (Attendance.DECLINED.equals(myStatus)) {
+					%>
+					<p class="mb-2"><b><fmt:message key="event.myStatus" /></b> : <fmt:message key="event.my.declined" /></p>
+					<%
+						if (!event.isPast()) {
+					%>
+					<div class="d-flex gap-2">
+						<form action="./processApply.jsp" method="post">
+							<input type="hidden" name="eventId" value="<%=event.getEventId()%>">
+							<button type="submit" class="btn btn-primary" <%=event.isFull() ? "disabled" : ""%>><fmt:message key="event.toApply" /></button>
+						</form>
+						<form action="./processCancel.jsp" method="post">
+							<input type="hidden" name="eventId" value="<%=event.getEventId()%>">
+							<button type="submit" class="btn btn-outline-secondary"><fmt:message key="event.clearResponse" /></button>
+						</form>
+					</div>
 					<%
 						}
 					} else if (event.isPast()) {
 					%>
 					<button type="button" class="btn btn-secondary" disabled><fmt:message key="event.closed" /></button>
-					<%
-					} else if (event.isFull()) {
-					%>
-					<button type="button" class="btn btn-secondary" disabled><fmt:message key="event.full" /></button>
 					<%
 					} else if (loginId == null) {
 					%>
@@ -124,10 +187,27 @@
 					<%
 					} else {
 					%>
-					<form action="./processApply.jsp" method="post">
-						<input type="hidden" name="eventId" value="<%=event.getEventId()%>">
-						<button type="submit" class="btn btn-primary"><fmt:message key="event.apply" /></button>
-					</form>
+					<p class="text-secondary small mb-2"><fmt:message key="event.respondHint" /></p>
+					<div class="d-flex gap-2">
+						<%
+						if (event.isFull()) {
+						%>
+						<button type="button" class="btn btn-secondary" disabled><fmt:message key="event.full" /></button>
+						<%
+						} else {
+						%>
+						<form action="./processApply.jsp" method="post">
+							<input type="hidden" name="eventId" value="<%=event.getEventId()%>">
+							<button type="submit" class="btn btn-primary"><fmt:message key="event.apply" /></button>
+						</form>
+						<%
+						}
+						%>
+						<form action="./processDecline.jsp" method="post">
+							<input type="hidden" name="eventId" value="<%=event.getEventId()%>">
+							<button type="submit" class="btn btn-outline-secondary"><fmt:message key="event.decline" /></button>
+						</form>
+					</div>
 					<%
 					}
 					%>

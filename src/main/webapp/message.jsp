@@ -12,12 +12,17 @@ if (flashCode != null) {
 	case "eventUpdated":
 	case "applied":
 	case "attendanceSaved":
+	case "reportSaved":
 		flashType = "success";
 		break;
 	case "logout":
 	case "eventDeleted":
 	case "applyAlready":
 	case "cancelled":
+	case "declined":
+	case "responseCleared":
+	case "declineAlready":
+	case "seminarNoApply":
 		flashType = "info";
 		break;
 	case "needLogin":
@@ -26,6 +31,8 @@ if (flashCode != null) {
 	case "applyClosed":
 	case "cancelFail":
 	case "checkNotOpen":
+	case "reportNotAllowed":
+	case "reportNotFound":
 		flashType = "warning";
 		break;
 	case "noAuth":

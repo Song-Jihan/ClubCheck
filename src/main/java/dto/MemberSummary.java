@@ -14,6 +14,7 @@ public class MemberSummary implements Serializable {
 	private int presentCount;
 	private int absentCount;
 	private int appliedCount;
+	private int declinedCount;
 
 	public MemberSummary() {
 		super();
@@ -28,6 +29,14 @@ public class MemberSummary implements Serializable {
 	public int getAttendanceRate() {
 		int checked = getCheckedCount();
 		return (checked == 0) ? -1 : Math.round(presentCount * 100f / checked);
+	}
+
+	public int getDeclinedCount() {
+		return declinedCount;
+	}
+
+	public void setDeclinedCount(int declinedCount) {
+		this.declinedCount = declinedCount;
 	}
 
 	public boolean isAdmin() {

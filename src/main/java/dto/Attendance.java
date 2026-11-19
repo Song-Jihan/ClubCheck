@@ -14,6 +14,8 @@ public class Attendance implements Serializable {
 	public static final String APPLIED = "APPLIED";
 	public static final String PRESENT = "PRESENT";
 	public static final String ABSENT = "ABSENT";
+	/** 대외활동에 '미참여'로 응답함 (결석·출석률에 넣지 않는다) */
+	public static final String DECLINED = "DECLINED";
 
 	private int eventId;
 	private String memberId;
@@ -25,14 +27,22 @@ public class Attendance implements Serializable {
 	private String studentNo;
 	private String eventTitle;
 	private Timestamp eventDate;
+	private String eventType;
+	// 이 결석에 낸 결석사유서 번호 (없으면 0)
+	private int reportId;
 
 	public Attendance() {
 		super();
 	}
 
-	/** APPLIED, PRESENT, ABSENT 중 하나이면 true. 폼에서 들어온 값을 검사할 때 쓴다. */
+	/** 관리자가 출석 체크에서 정할 수 있는 상태(APPLIED, PRESENT, ABSENT)이면 true. 폼에서 들어온 값을 검사할 때 쓴다. */
 	public static boolean isValidStatus(String status) {
 		return APPLIED.equals(status) || PRESENT.equals(status) || ABSENT.equals(status);
+	}
+
+	/** 정기세미나 결석이라 결석사유서를 낼 수 있으면 true. */
+	public boolean isReportable() {
+		return ABSENT.equals(status) && Event.SEMINAR.equals(eventType);
 	}
 
 	/** 행사가 이미 시작했으면 true. */
@@ -102,6 +112,22 @@ public class Attendance implements Serializable {
 
 	public void setEventTitle(String eventTitle) {
 		this.eventTitle = eventTitle;
+	}
+
+	public String getEventType() {
+		return eventType;
+	}
+
+	public void setEventType(String eventType) {
+		this.eventType = eventType;
+	}
+
+	public int getReportId() {
+		return reportId;
+	}
+
+	public void setReportId(int reportId) {
+		this.reportId = reportId;
 	}
 
 	public Timestamp getEventDate() {

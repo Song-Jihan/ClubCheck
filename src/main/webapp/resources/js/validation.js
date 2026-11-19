@@ -104,19 +104,22 @@ function checkEvent() {
 		location.focus();
 		return false;
 	}
-	if (!check(/^[0-9]{1,3}$/, capacity, t("event.capacity")))
-		return false;
-	var cap = parseInt(capacity.value, 10);
-	var applied = parseInt(capacity.getAttribute("data-applied") || "0", 10);
-	if (cap < 1 || cap > 500) {
-		alert(t("event.capacity"));
-		capacity.focus();
-		return false;
-	}
-	if (cap < applied) {
-		alert(t("event.capacityApplied").replace("{0}", applied));
-		capacity.focus();
-		return false;
+	// 정기세미나는 정원 칸이 꺼져(disabled) 있으므로 검사하지 않는다
+	if (!capacity.disabled) {
+		if (!check(/^[0-9]{1,3}$/, capacity, t("event.capacity")))
+			return false;
+		var cap = parseInt(capacity.value, 10);
+		var applied = parseInt(capacity.getAttribute("data-applied") || "0", 10);
+		if (cap < 1 || cap > 500) {
+			alert(t("event.capacity"));
+			capacity.focus();
+			return false;
+		}
+		if (cap < applied) {
+			alert(t("event.capacityApplied").replace("{0}", applied));
+			capacity.focus();
+			return false;
+		}
 	}
 	if (description.value.length > 2000) {
 		alert(t("event.description"));
@@ -131,6 +134,51 @@ function checkEvent() {
 		}
 		if (file.size > 5 * 1024 * 1024) {
 			alert(t("event.posterSize"));
+			return false;
+		}
+	}
+	return true;
+}
+
+// 행사 등록 폼: 종류 라디오를 바꿀 때 정원 칸을 보이거나 숨긴다
+function toggleEventType() {
+	var seminar = document.getElementById("typeSeminar");
+	var group = document.getElementById("capacityGroup");
+	var capacity = document.getElementById("capacity");
+	if (!seminar || !group || !capacity)
+		return;
+	group.style.display = seminar.checked ? "none" : "";
+	capacity.disabled = seminar.checked;
+}
+
+// 결석사유서 폼: <form name="absenceForm" onsubmit="return checkAbsence()">
+function checkAbsence() {
+	var form = document.absenceForm.elements;
+	var title = form["title"];
+	var reason = form["reason"];
+	var evidence = form["evidence"];
+
+	title.value = title.value.trim();
+	reason.value = reason.value.trim();
+
+	if (title.value === "" || title.value.length > 100) {
+		alert(t("absence.title"));
+		title.focus();
+		return false;
+	}
+	if (reason.value === "" || reason.value.length > 1000) {
+		alert(t("absence.reason"));
+		reason.focus();
+		return false;
+	}
+	if (evidence.files && evidence.files.length > 0) {
+		var file = evidence.files[0];
+		if (!/\.(jpe?g|png|gif|webp)$/i.test(file.name)) {
+			alert(t("absence.evidenceType"));
+			return false;
+		}
+		if (file.size > 5 * 1024 * 1024) {
+			alert(t("absence.evidenceSize"));
 			return false;
 		}
 	}

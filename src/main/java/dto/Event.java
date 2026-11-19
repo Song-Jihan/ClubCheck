@@ -8,8 +8,14 @@ public class Event implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	/** 정기세미나: 전원 필수 참여, 신청·정원 없음 */
+	public static final String SEMINAR = "SEMINAR";
+	/** 대외활동: 선택 참여, 신청·미참여 응답, 정원 있음 */
+	public static final String ACTIVITY = "ACTIVITY";
+
 	private int eventId;
 	private String title;
+	private String eventType = ACTIVITY;
 	private String description;
 	private Timestamp eventDate;
 	private String location;
@@ -37,9 +43,14 @@ public class Event implements Serializable {
 		return !java.time.LocalDateTime.now().isBefore(dayStart);
 	}
 
-	/** 신청 인원이 정원에 도달했으면 true. */
+	/** 정기세미나이면 true. */
+	public boolean isSeminar() {
+		return SEMINAR.equals(eventType);
+	}
+
+	/** 신청 인원이 정원에 도달했으면 true. 정기세미나는 정원이 없으므로 항상 false. */
 	public boolean isFull() {
-		return appliedCount >= capacity;
+		return !isSeminar() && appliedCount >= capacity;
 	}
 
 	public int getEventId() {
@@ -56,6 +67,14 @@ public class Event implements Serializable {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	public String getEventType() {
+		return eventType;
+	}
+
+	public void setEventType(String eventType) {
+		this.eventType = eventType;
 	}
 
 	public String getDescription() {
