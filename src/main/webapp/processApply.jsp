@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" errorPage="error500.jsp"%>
 <%@ page import="dao.AttendanceDAO"%>
 <%@ include file="loginCheck.jsp"%>
 <jsp:useBean id="attendanceDAO" class="dao.AttendanceDAO" scope="page" />

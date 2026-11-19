@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" errorPage="error500.jsp"%>
 <%@ page import="java.io.File"%>
 <%@ page import="java.io.IOException"%>
 <%@ page import="java.sql.SQLException"%>
@@ -84,11 +84,11 @@
 	String imageType = null;
 	if (uploaded != null) {
 		if (uploaded.length() > PosterUtil.MAX_FILE_SIZE) {
-			errors.add("포스터는 5MB 이하만 올릴 수 있습니다.");
+			errors.add("err.poster.size");
 		} else {
 			imageType = PosterUtil.detectImageType(uploaded);
 			if (imageType == null) {
-				errors.add("포스터는 JPG, PNG, GIF, WEBP 이미지만 올릴 수 있습니다.");
+				errors.add("err.poster.type");
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" errorPage="error500.jsp"%>
 <%@ page import="java.util.LinkedHashMap"%>
 <%@ page import="dto.Event"%>
 <%@ page import="dto.Attendance"%>

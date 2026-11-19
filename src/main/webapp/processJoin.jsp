@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" errorPage="error500.jsp"%>
 <%@ page import="java.util.ArrayList"%>
 <%@ page import="java.sql.SQLIntegrityConstraintViolationException"%>
 <%@ page import="dto.Member"%>
@@ -31,10 +31,10 @@
 	// 2) 중복 검사 (형식이 맞을 때만 DB 를 조회한다)
 	if (errors.isEmpty()) {
 		if (memberDAO.existsById(id)) {
-			errors.add("이미 사용 중인 아이디입니다.");
+			errors.add("err.join.idTaken");
 		}
 		if (memberDAO.existsByStudentNo(studentNo)) {
-			errors.add("이미 가입된 학번입니다.");
+			errors.add("err.join.studentNoTaken");
 		}
 	}
 
@@ -48,12 +48,12 @@
 		try {
 			memberDAO.insert(member);
 		} catch (SQLIntegrityConstraintViolationException e) {
-			errors.add("이미 사용 중인 아이디 또는 학번입니다.");
+			errors.add("err.join.duplicate");
 		}
 	}
 
 	if (!errors.isEmpty()) {
-		// 오류 목록을 request 에 담아 가입 화면으로 forward 한다 (입력했던 값도 그대로 전달된다)
+		// 오류 목록(메시지 키)을 request 에 담아 가입 화면으로 forward 한다 (입력했던 값도 그대로 전달된다)
 		request.setAttribute("errors", errors);
 %>
 <jsp:forward page="join.jsp" />

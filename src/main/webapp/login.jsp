@@ -1,6 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="util.HtmlUtil"%>
 <%@ page import="util.MemberValidator"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ include file="locale.jsp"%>
 <%
 	if (session.getAttribute("loginId") != null) {
 		response.sendRedirect("events.jsp");
@@ -23,15 +25,17 @@
 	if (inputId == null) {
 		inputId = (savedId != null) ? savedId : "";
 	}
-	String errorMsg = (String) request.getAttribute("errorMsg");
+	// processLogin.jsp 에서 로그인에 실패해 forward 로 돌아온 경우의 오류 메시지 키
+	String errorKey = (String) request.getAttribute("errorKey");
 %>
 <!DOCTYPE html>
-<html>
+<html lang="<%=lang%>">
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="./resources/css/bootstrap.min.css">
+<%@ include file="jsMessages.jsp"%>
 <script type="text/javascript" src="./resources/js/validation.js"></script>
-<title>로그인 - ClubCheck</title>
+<title><fmt:message key="login.pageTitle" /> - ClubCheck</title>
 </head>
 <body>
 	<div class="container py-4">
@@ -39,8 +43,8 @@
 
 		<div class="p-5 mb-4 bg-body-tertiary rounded-3">
 			<div class="container-fluid py-3">
-				<h1 class="display-6 fw-bold">로그인</h1>
-				<p class="col-md-8 fs-5 mb-0">Login</p>
+				<h1 class="display-6 fw-bold"><fmt:message key="login.pageTitle" /></h1>
+				<p class="col-md-8 fs-5 mb-0"><fmt:message key="login.lead" /></p>
 			</div>
 		</div>
 
@@ -48,9 +52,9 @@
 			<div class="col-md-5">
 				<%@ include file="message.jsp"%>
 				<%
-				if (errorMsg != null) {
+				if (errorKey != null) {
 				%>
-				<div class="alert alert-danger" role="alert"><%=HtmlUtil.escape(errorMsg)%></div>
+				<div class="alert alert-danger" role="alert"><fmt:message key="<%=errorKey%>" /></div>
 				<%
 				}
 				%>
@@ -58,24 +62,24 @@
 				<form name="loginForm" action="./processLogin.jsp" method="post"
 					onsubmit="return checkLogin()">
 					<div class="mb-3">
-						<label for="id" class="form-label">아이디</label>
+						<label for="id" class="form-label"><fmt:message key="login.id" /></label>
 						<input type="text" id="id" name="id" class="form-control" maxlength="20"
 							value="<%=HtmlUtil.escape(inputId)%>" autocomplete="username">
 					</div>
 					<div class="mb-3">
-						<label for="password" class="form-label">비밀번호</label>
+						<label for="password" class="form-label"><fmt:message key="login.password" /></label>
 						<input type="password" id="password" name="password" class="form-control"
 							maxlength="20" autocomplete="current-password">
 					</div>
 					<div class="form-check mb-4">
 						<input type="checkbox" id="rememberId" name="rememberId" value="on"
 							class="form-check-input" <%=(savedId != null) ? "checked" : ""%>>
-						<label for="rememberId" class="form-check-label">아이디 저장</label>
+						<label for="rememberId" class="form-check-label"><fmt:message key="login.remember" /></label>
 					</div>
-					<button type="submit" class="btn btn-primary w-100">로그인</button>
+					<button type="submit" class="btn btn-primary w-100"><fmt:message key="login.submit" /></button>
 				</form>
 				<p class="text-center mt-3">
-					아직 회원이 아니신가요? <a href="./join.jsp">회원가입</a>
+					<fmt:message key="login.noAccount" /> <a href="./join.jsp"><fmt:message key="login.joinLink" /></a>
 				</p>
 			</div>
 		</div>

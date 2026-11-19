@@ -4,6 +4,8 @@
 <%@ page import="util.DateUtil"%>
 <%@ page import="java.util.ArrayList"%>
 <%@ page import="dto.Attendance"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ include file="locale.jsp"%>
 <%@ include file="loginCheck.jsp"%>
 <jsp:useBean id="memberDAO" class="dao.MemberDAO" scope="page" />
 <jsp:useBean id="attendanceDAO" class="dao.AttendanceDAO" scope="page" />
@@ -31,13 +33,14 @@
 	}
 	int checkedCount = presentCount + absentCount;
 	int attendanceRate = (checkedCount == 0) ? 0 : Math.round(presentCount * 100f / checkedCount);
+	String entranceYear = member.getEntranceYear();
 %>
 <!DOCTYPE html>
-<html>
+<html lang="<%=lang%>">
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="./resources/css/bootstrap.min.css">
-<title>내 정보 - ClubCheck</title>
+<title><fmt:message key="my.pageTitle" /> - ClubCheck</title>
 </head>
 <body>
 	<div class="container py-4">
@@ -45,8 +48,8 @@
 
 		<div class="p-5 mb-4 bg-body-tertiary rounded-3">
 			<div class="container-fluid py-3">
-				<h1 class="display-6 fw-bold">내 정보</h1>
-				<p class="col-md-8 fs-5 mb-0">My Page</p>
+				<h1 class="display-6 fw-bold"><fmt:message key="my.pageTitle" /></h1>
+				<p class="col-md-8 fs-5 mb-0"><fmt:message key="my.lead" /></p>
 			</div>
 		</div>
 
@@ -55,25 +58,25 @@
 				<table class="table">
 					<tbody>
 						<tr>
-							<th scope="row" class="w-25">아이디</th>
+							<th scope="row" class="w-25"><fmt:message key="my.id" /></th>
 							<td><%=HtmlUtil.escape(member.getId())%></td>
 						</tr>
 						<tr>
-							<th scope="row">이름</th>
+							<th scope="row"><fmt:message key="my.name" /></th>
 							<td><%=HtmlUtil.escape(member.getName())%></td>
 						</tr>
 						<tr>
-							<th scope="row">학번</th>
+							<th scope="row"><fmt:message key="my.studentNo" /></th>
 							<td><%=HtmlUtil.escape(member.getStudentNo())%>
-								<span class="text-secondary">(<%=member.getEntranceYear()%>학번)</span></td>
+								<span class="text-secondary"><fmt:message key="my.entranceYear"><fmt:param value="<%=entranceYear%>" /></fmt:message></span></td>
 						</tr>
 						<tr>
-							<th scope="row">권한</th>
-							<td><%=member.isAdmin() ? "관리자" : "일반 회원"%></td>
+							<th scope="row"><fmt:message key="my.role" /></th>
+							<td><%=msg(pageContext, member.isAdmin() ? "role.admin" : "role.member")%></td>
 						</tr>
 						<tr>
-							<th scope="row">가입일</th>
-							<td><%=DateUtil.format(member.getJoinedAt())%></td>
+							<th scope="row"><fmt:message key="my.joinedAt" /></th>
+							<td><%=DateUtil.format(member.getJoinedAt(), lang)%></td>
 						</tr>
 					</tbody>
 				</table>
@@ -81,11 +84,11 @@
 			<div class="col-md-6">
 				<div class="card">
 					<div class="card-body">
-						<h5 class="card-title">출석률</h5>
+						<h5 class="card-title"><fmt:message key="my.rateTitle" /></h5>
 						<%
 						if (checkedCount == 0) {
 						%>
-						<p class="text-secondary mb-0">아직 출석 처리된 행사가 없습니다.</p>
+						<p class="text-secondary mb-0"><fmt:message key="my.rateNone" /></p>
 						<%
 						} else {
 						%>
@@ -95,30 +98,30 @@
 							aria-valuemin="0" aria-valuemax="100">
 							<div class="progress-bar bg-success" style="width: <%=attendanceRate%>%"></div>
 						</div>
-						<p class="text-secondary mb-0">출석 <%=presentCount%>회 · 결석 <%=absentCount%>회</p>
+						<p class="text-secondary mb-0"><fmt:message key="my.rateDetail"><fmt:param value="<%=presentCount%>" /><fmt:param value="<%=absentCount%>" /></fmt:message></p>
 						<%
 						}
 						%>
-						<p class="text-secondary mb-0">참석 예정 <%=upcomingCount%>건</p>
+						<p class="text-secondary mb-0"><fmt:message key="my.upcoming"><fmt:param value="<%=upcomingCount%>" /></fmt:message></p>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<h4 class="mt-5 mb-3">내 참석 기록</h4>
+		<h4 class="mt-5 mb-3"><fmt:message key="my.records" /></h4>
 		<%
 		if (records.isEmpty()) {
 		%>
-		<p class="text-secondary">아직 신청한 행사가 없습니다. <a href="./events.jsp">행사 목록</a>에서 신청해 보세요.</p>
+		<p class="text-secondary"><fmt:message key="my.recordsEmpty" /> <a href="./events.jsp"><fmt:message key="my.recordsEmptyLink" /></a></p>
 		<%
 		} else {
 		%>
 		<table class="table align-middle">
 			<thead>
 				<tr>
-					<th scope="col">행사</th>
-					<th scope="col">일시</th>
-					<th scope="col">상태</th>
+					<th scope="col"><fmt:message key="my.colEvent" /></th>
+					<th scope="col"><fmt:message key="my.colDate" /></th>
+					<th scope="col"><fmt:message key="my.colStatus" /></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -126,18 +129,18 @@
 				for (Attendance r : records) {
 					String badge;
 					if (Attendance.PRESENT.equals(r.getStatus())) {
-						badge = "<span class=\"badge text-bg-success\">출석</span>";
+						badge = "<span class=\"badge text-bg-success\">" + msg(pageContext, "badge.present") + "</span>";
 					} else if (Attendance.ABSENT.equals(r.getStatus())) {
-						badge = "<span class=\"badge text-bg-danger\">결석</span>";
+						badge = "<span class=\"badge text-bg-danger\">" + msg(pageContext, "badge.absent") + "</span>";
 					} else if (r.isEventPast()) {
-						badge = "<span class=\"badge text-bg-secondary\">미처리</span>";
+						badge = "<span class=\"badge text-bg-secondary\">" + msg(pageContext, "badge.pending") + "</span>";
 					} else {
-						badge = "<span class=\"badge text-bg-primary\">참석 예정</span>";
+						badge = "<span class=\"badge text-bg-primary\">" + msg(pageContext, "badge.upcoming") + "</span>";
 					}
 				%>
 				<tr>
 					<td><a href="./event.jsp?id=<%=r.getEventId()%>"><%=HtmlUtil.escape(r.getEventTitle())%></a></td>
-					<td><%=DateUtil.format(r.getEventDate())%></td>
+					<td><%=DateUtil.format(r.getEventDate(), lang)%></td>
 					<td><%=badge%></td>
 				</tr>
 				<%

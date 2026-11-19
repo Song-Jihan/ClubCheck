@@ -2,12 +2,13 @@
 
 JSP 기초 기술만으로 만든 동아리 행사 등록·참석 신청·출석 관리 웹 애플리케이션입니다.
 
-> 현재 구현 단계: **P3 (참석 신청·취소, 출석 체크, 내 참석 기록)**
+> 현재 구현 단계: **P4 (다국어 한/영, 언어 쿠키, 에러 페이지)**
 >
 > - P0: DB 스키마, 공통 뼈대, 행사 목록·상세 조회
 > - P1: 회원 기능 (가입, 로그인, 세션, 아이디 저장 쿠키)
 > - P2: 행사 관리 (관리자 전용, cos 로 포스터 업로드)
-> - P3: 참석 신청·취소, 관리자 출석 체크, 내 참석 기록·출석률
+> - P3: 참석 신청·취소, 관리자 출석 체크, 내 참석 기록·출석률, 부원 출결 현황
+> - P4: 다국어(한/영) 처리, 언어 선택 쿠키, 404·500 에러 페이지
 
 ## 실행 환경
 
@@ -73,6 +74,25 @@ JSP 기초 기술만으로 만든 동아리 행사 등록·참석 신청·출석
 | 내 참석 기록 | `myPage.jsp` | JOIN 조회, 출석률(출석 ÷ 출석 처리된 행사), div 너비로 그린 막대 |
 | 부원 출결 현황 | `members.jsp` | 관리자 전용. 행사별 탭: 부원 × 오늘까지의 행사 출결표와 출석·결석 횟수. 출석률 탭: `GROUP BY` 집계, 이름순·출석률순 정렬 |
 
+### 다국어 처리 (한/영)
+
+- 화면 문구는 `src/main/java/bundle/message_ko.properties`, `message_en.properties`에 있고, JSP는 JSTL `<fmt:message>`로 꺼냅니다.
+- 한글은 `\uXXXX`로 저장되어 있습니다. IntelliJ에서 한글로 보려면 Settings > Editor > File Encodings > *Transparent native-to-ascii conversion*을 켭니다.
+- `locale.jsp`: 모든 화면 맨 위에 include. `?lang=ko|en`이면 그 언어를 쓰고 쿠키 `lang`(1년)에 저장, 없으면 쿠키, 둘 다 없으면 한국어. 언어와 메시지 묶음은 request 범위라서 `jsp:include`한 푸터와 forward된 화면도 같은 언어를 씁니다.
+- 메뉴 오른쪽의 "한국어 | English"로 바꿉니다. 지금 보고 있는 주소에서 언어만 바꿉니다.
+- 서버 검사 오류(`MemberValidator`, `EventValidator`)는 문장 대신 메시지 키를 돌려주고, JS 알림 문구는 `jsMessages.jsp`가 현재 언어로 만들어 `validation.js`에 넘깁니다.
+- 날짜의 요일도 언어에 맞춰 바뀝니다 (예: (목) / (Thu)).
+
+### 에러 페이지
+
+| 상황 | 연결 방법 | 화면 |
+|---|---|---|
+| 없는 주소 | `web.xml` `<error-page>` 404 | `error404.jsp` |
+| 처리 페이지(`process*.jsp`)의 예외 | page 디렉티브 `errorPage="error500.jsp"` | `error500.jsp` |
+| 그 밖의 예외·500 | `web.xml` `<error-page>` 500, `java.lang.Throwable` | `error500.jsp` |
+
+`error500.jsp`는 `isErrorPage="true"`라서 내장 객체 `exception`을 씁니다. 예외 내용은 서버 로그에 남기고, 화면에는 관리자에게만 원인(예외 종류와 메시지)을 보여 줍니다.
+
 ### 참석 신청 규칙
 
 - 신청과 취소는 행사 시작 전까지만 가능합니다. 출석 처리가 끝난 신청은 취소할 수 없습니다.
@@ -95,9 +115,10 @@ ClubCheck
 ├─ sql/                      DB 스키마와 시드 데이터
 ├─ src/main/java
 │  ├─ db.properties.example  DB 접속 정보 양식 (복사해서 db.properties로 사용)
+│  ├─ bundle/                메시지 (message_ko / message_en .properties)
 │  ├─ dao/                   EventDAO, MemberDAO, AttendanceDAO (테이블 접근)
 │  ├─ dto/                   Event, Member, Attendance, MemberSummary (자바빈)
-│  └─ util/                  DB 연결, 출력 도우미, 입력 검사, 포스터 업로드
+│  └─ util/                  DB 연결, 출력 도우미, 입력 검사, 포스터 업로드, 언어
 └─ src/main/webapp
    ├─ events.jsp             행사 목록 (첫 화면)
    ├─ event.jsp              행사 상세
@@ -111,6 +132,10 @@ ClubCheck
    ├─ processApply.jsp       참석 신청 (processCancel.jsp: 취소)
    ├─ checkAttendance.jsp    출석 체크 (processCheckAttendance.jsp 가 저장)
    ├─ members.jsp            부원 출결 현황 (행사별 / 출석률)
+   ├─ locale.jsp             언어 선택·쿠키 (include 용)
+   ├─ jsMessages.jsp         JS 알림 문구 (include 용)
+   ├─ errorList.jsp          검사 오류 목록 (include 용)
+   ├─ error404.jsp, error500.jsp 에러 페이지
    ├─ menu.jsp, footer.jsp   공통 메뉴와 푸터
    ├─ resources/             CSS, JS(유효성 검사), 포스터 이미지
    └─ WEB-INF/               web.xml, 라이브러리

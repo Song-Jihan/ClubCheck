@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" errorPage="error500.jsp"%>
 <%@ page import="dto.Member"%>
 <jsp:useBean id="memberDAO" class="dao.MemberDAO" scope="page" />
 <%
@@ -22,7 +22,7 @@
 
 	if (member == null) {
 		// 아이디가 틀렸는지 비밀번호가 틀렸는지는 알려 주지 않는다 (아이디 존재 여부 노출 방지)
-		request.setAttribute("errorMsg", "아이디 또는 비밀번호가 올바르지 않습니다.");
+		request.setAttribute("errorKey", "err.login.failed");
 %>
 <jsp:forward page="login.jsp" />
 <%

@@ -18,28 +18,28 @@ public class MemberValidator {
 	// 학번: 입학 연도 4자리 + 일련번호 5자리. 예: 202211469
 	public static final Pattern STUDENT_NO = Pattern.compile("^(20[0-9]{2})[0-9]{5}$");
 
-	// 입력값에 대한 오류 메시지 목록을 돌려준다. 비어 있으면 통과다.
+	// 입력값에 대한 오류 메시지 키 목록을 돌려준다 (bundle/message_*.properties 의 err.join.*). 비어 있으면 통과다.
 	public static ArrayList<String> validateJoin(String id, String password, String passwordConfirm,
 			String name, String studentNo) {
 		ArrayList<String> errors = new ArrayList<String>();
 
 		if (id == null || !ID.matcher(id).matches()) {
-			errors.add("아이디는 영문 소문자로 시작하고, 영문 소문자와 숫자로 4~20자여야 합니다.");
+			errors.add("err.join.id");
 		}
 		if (password == null || !PASSWORD.matcher(password).matches()) {
-			errors.add("비밀번호는 공백 없이 8~20자이며, 영문과 숫자를 모두 포함해야 합니다.");
+			errors.add("err.join.password");
 		} else if (!password.equals(passwordConfirm)) {
-			errors.add("비밀번호 확인이 일치하지 않습니다.");
+			errors.add("err.join.passwordConfirm");
 		}
 		if (name == null || !NAME.matcher(name).matches()) {
-			errors.add("이름은 한글 또는 영문으로 2~20자여야 합니다.");
+			errors.add("err.join.name");
 		}
 		if (studentNo == null || !STUDENT_NO.matcher(studentNo).matches()) {
-			errors.add("학번은 9자리 숫자여야 합니다. (예: 202211469)");
+			errors.add("err.join.studentNo");
 		} else {
 			int year = Integer.parseInt(studentNo.substring(0, 4));
 			if (year > Year.now().getValue()) {
-				errors.add("학번의 입학 연도(앞 4자리)가 올해보다 늦을 수 없습니다.");
+				errors.add("err.join.studentYear");
 			}
 		}
 		return errors;

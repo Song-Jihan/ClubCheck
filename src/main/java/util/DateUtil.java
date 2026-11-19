@@ -9,10 +9,16 @@ public class DateUtil {
 
 	/** 예: 2026.11.19 (목) 18:30 */
 	public static String format(Timestamp date) {
+		return format(date, "ko");
+	}
+
+	/** 언어에 맞춰 요일을 붙인다. ko: 2026.11.19 (목) 18:30, en: 2026.11.19 (Thu) 18:30 */
+	public static String format(Timestamp date, String lang) {
 		if (date == null) {
 			return "";
 		}
-		SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd (E) HH:mm", Locale.KOREAN);
+		Locale locale = "en".equals(lang) ? Locale.ENGLISH : Locale.KOREAN;
+		SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd (E) HH:mm", locale);
 		return format.format(date);
 	}
 

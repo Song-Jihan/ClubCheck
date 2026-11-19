@@ -7,22 +7,25 @@
 <%@ page import="dto.MemberSummary"%>
 <%@ page import="dao.AttendanceDAO"%>
 <%@ page import="util.HtmlUtil"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ include file="locale.jsp"%>
 <%@ include file="adminCheck.jsp"%>
 <jsp:useBean id="eventDAO" class="dao.EventDAO" scope="page" />
 <jsp:useBean id="attendanceDAO" class="dao.AttendanceDAO" scope="page" />
 <%!
 	// 선언문 태그: 행사별 출결표의 칸 하나를 만든다
-	private String cell(String status) {
+	private String cell(PageContext pc, String status) {
 		if (Attendance.PRESENT.equals(status)) {
-			return "<td class=\"text-success fw-bold\" title=\"출석\">○</td>";
+			return "<td class=\"text-success fw-bold\" title=\"" + msg(pc, "members.cell.present") + "\">○</td>";
 		}
 		if (Attendance.ABSENT.equals(status)) {
-			return "<td class=\"text-danger fw-bold\" title=\"결석\">✕</td>";
+			return "<td class=\"text-danger fw-bold\" title=\"" + msg(pc, "members.cell.absent") + "\">✕</td>";
 		}
 		if (Attendance.APPLIED.equals(status)) {
-			return "<td class=\"text-secondary small\" title=\"신청했지만 출석 처리 전\">미처리</td>";
+			return "<td class=\"text-secondary small\" title=\"" + msg(pc, "members.cell.pendingTitle") + "\">"
+					+ msg(pc, "members.cell.pending") + "</td>";
 		}
-		return "<td class=\"text-body-tertiary\" title=\"신청하지 않음\">-</td>";
+		return "<td class=\"text-body-tertiary\" title=\"" + msg(pc, "members.cell.none") + "\">-</td>";
 	}
 %>
 <%
@@ -33,13 +36,15 @@
 	boolean sortByRate = "rate".equals(request.getParameter("sort"));
 
 	ArrayList<MemberSummary> members = attendanceDAO.getMemberSummaries();
+	int memberCount = members.size();
+	String adminBadge = "<span class=\"badge text-bg-dark\">" + msg(pageContext, "role.badge") + "</span>";
 %>
 <!DOCTYPE html>
-<html>
+<html lang="<%=lang%>">
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="./resources/css/bootstrap.min.css">
-<title>부원 출결 현황 - ClubCheck</title>
+<title><fmt:message key="members.pageTitle" /> - ClubCheck</title>
 <style>
 	/* 행사가 많아 표가 옆으로 길어져도 이름 칸은 왼쪽에 고정한다 */
 	.sticky-col { position: sticky; left: 0; background: var(--bs-body-bg); z-index: 1; }
@@ -53,16 +58,16 @@
 
 		<div class="p-5 mb-4 bg-body-tertiary rounded-3">
 			<div class="container-fluid py-3">
-				<h1 class="display-6 fw-bold">부원 출결 현황</h1>
-				<p class="col-md-8 fs-5 mb-0">전체 부원 <%=members.size()%>명</p>
+				<h1 class="display-6 fw-bold"><fmt:message key="members.pageTitle" /></h1>
+				<p class="col-md-8 fs-5 mb-0"><fmt:message key="members.lead"><fmt:param value="<%=memberCount%>" /></fmt:message></p>
 			</div>
 		</div>
 
 		<ul class="nav nav-tabs mb-4">
 			<li class="nav-item"><a href="./members.jsp?view=event"
-				class="nav-link <%="event".equals(view) ? "active" : ""%>">행사별</a></li>
+				class="nav-link <%="event".equals(view) ? "active" : ""%>"><fmt:message key="members.tabEvent" /></a></li>
 			<li class="nav-item"><a href="./members.jsp?view=rate"
-				class="nav-link <%="rate".equals(view) ? "active" : ""%>">출석률</a></li>
+				class="nav-link <%="rate".equals(view) ? "active" : ""%>"><fmt:message key="members.tabRate" /></a></li>
 		</ul>
 
 		<%
@@ -73,17 +78,18 @@
 			SimpleDateFormat headerFormat = new SimpleDateFormat("MM.dd");
 			int[] presentByEvent = new int[events.size()];
 			int[] appliedByEvent = new int[events.size()];
+			int eventCount = events.size();
 		%>
 		<p class="text-secondary small mb-2">
-			<span class="text-success fw-bold">○</span> 출석 &nbsp;
-			<span class="text-danger fw-bold">✕</span> 결석 &nbsp;
-			미처리: 신청했지만 출석 처리 전 &nbsp; -: 신청하지 않음 &nbsp;·&nbsp;
-			오늘까지의 행사 <%=events.size()%>개 · 결석 횟수에 미신청은 포함하지 않습니다.
+			<span class="text-success fw-bold">○</span> <fmt:message key="members.legend.present" /> &nbsp;
+			<span class="text-danger fw-bold">✕</span> <fmt:message key="members.legend.absent" /> &nbsp;
+			<fmt:message key="members.legend.pending" /> &nbsp; <fmt:message key="members.legend.none" /> &nbsp;·&nbsp;
+			<fmt:message key="members.eventCount"><fmt:param value="<%=eventCount%>" /></fmt:message>
 		</p>
 		<%
 			if (events.isEmpty()) {
 		%>
-		<p class="text-secondary">아직 출석 체크가 열린 행사가 없습니다.</p>
+		<p class="text-secondary"><fmt:message key="members.empty" /></p>
 		<%
 			} else {
 		%>
@@ -91,8 +97,8 @@
 			<table class="table table-bordered table-sm align-middle matrix">
 				<thead class="table-light">
 					<tr>
-						<th scope="col" class="sticky-col">이름</th>
-						<th scope="col">학번</th>
+						<th scope="col" class="sticky-col"><fmt:message key="members.colName" /></th>
+						<th scope="col"><fmt:message key="members.colStudentNo" /></th>
 						<%
 						for (Event e : events) {
 						%>
@@ -102,8 +108,8 @@
 						<%
 						}
 						%>
-						<th scope="col" class="table-success">출석</th>
-						<th scope="col" class="table-danger">결석</th>
+						<th scope="col" class="table-success"><fmt:message key="members.colPresent" /></th>
+						<th scope="col" class="table-danger"><fmt:message key="members.colAbsent" /></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -127,7 +133,7 @@
 								appliedByEvent[i]++;
 							}
 						%>
-						<%=cell(status)%>
+						<%=cell(pageContext, status)%>
 						<%
 						}
 						%>
@@ -140,7 +146,7 @@
 				</tbody>
 				<tfoot class="table-light">
 					<tr>
-						<th scope="row" class="sticky-col">출석 / 신청</th>
+						<th scope="row" class="sticky-col"><fmt:message key="members.footerRow" /></th>
 						<td></td>
 						<%
 						for (int i = 0; i < events.size(); i++) {
@@ -167,22 +173,22 @@
 			}
 		%>
 		<div class="d-flex justify-content-between align-items-center mb-2">
-			<p class="text-secondary small mb-0">출석률 = 출석 ÷ (출석 + 결석). 미처리 신청은 계산에서 뺍니다.</p>
+			<p class="text-secondary small mb-0"><fmt:message key="members.rateNote" /></p>
 			<div class="btn-group btn-group-sm">
-				<a href="./members.jsp?view=rate" class="btn btn-outline-secondary <%=sortByRate ? "" : "active"%>">이름순</a>
-				<a href="./members.jsp?view=rate&sort=rate" class="btn btn-outline-secondary <%=sortByRate ? "active" : ""%>">출석률순</a>
+				<a href="./members.jsp?view=rate" class="btn btn-outline-secondary <%=sortByRate ? "" : "active"%>"><fmt:message key="members.sortName" /></a>
+				<a href="./members.jsp?view=rate&sort=rate" class="btn btn-outline-secondary <%=sortByRate ? "active" : ""%>"><fmt:message key="members.sortRate" /></a>
 			</div>
 		</div>
 		<table class="table align-middle">
 			<thead>
 				<tr>
 					<th scope="col">#</th>
-					<th scope="col">이름</th>
-					<th scope="col">학번</th>
-					<th scope="col">출석</th>
-					<th scope="col">결석</th>
-					<th scope="col">미처리·예정</th>
-					<th scope="col" style="width: 30%;">출석률</th>
+					<th scope="col"><fmt:message key="members.colName" /></th>
+					<th scope="col"><fmt:message key="members.colStudentNo" /></th>
+					<th scope="col"><fmt:message key="members.colPresent" /></th>
+					<th scope="col"><fmt:message key="members.colAbsent" /></th>
+					<th scope="col"><fmt:message key="members.colPending" /></th>
+					<th scope="col" style="width: 30%;"><fmt:message key="members.colRate" /></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -194,7 +200,7 @@
 				<tr>
 					<td><%=i + 1%></td>
 					<td><%=HtmlUtil.escape(m.getName())%>
-						<%=m.isAdmin() ? "<span class=\"badge text-bg-dark\">관리자</span>" : ""%></td>
+						<%=m.isAdmin() ? adminBadge : ""%></td>
 					<td class="text-secondary"><%=HtmlUtil.escape(m.getStudentNo())%></td>
 					<td><%=m.getPresentCount()%></td>
 					<td class="<%=m.getAbsentCount() > 0 ? "text-danger" : ""%>"><%=m.getAbsentCount()%></td>
@@ -203,7 +209,7 @@
 						<%
 						if (rate < 0) {
 						%>
-						<span class="text-secondary small">출석 처리된 행사 없음</span>
+						<span class="text-secondary small"><fmt:message key="members.noRate" /></span>
 						<%
 						} else {
 							// 출석률에 따라 막대 색을 바꾼다 (80% 이상 초록, 50% 이상 노랑, 그 아래 빨강)
