@@ -17,32 +17,43 @@ if (menuUri == null) {
 }
 String menuKoUrl = util.HtmlUtil.escape(util.LangUtil.switchUrl(menuUri, menuQuery, "ko"));
 String menuEnUrl = util.HtmlUtil.escape(util.LangUtil.switchUrl(menuUri, menuQuery, "en"));
+
+// 지금 화면에 해당하는 메뉴에 active 를 붙인다 (forward 된 화면이면 forward 된 주소 기준)
+String menuPath = request.getServletPath();
+String menuEventsOn = ("/events.jsp".equals(menuPath) || "/event.jsp".equals(menuPath)) ? " active" : "";
+String menuFormOn = "/eventForm.jsp".equals(menuPath) ? " active" : "";
+String menuMembersOn = ("/members.jsp".equals(menuPath) || "/checkAttendance.jsp".equals(menuPath)) ? " active" : "";
+String menuReportsOn = "/absenceReports.jsp".equals(menuPath) ? " active" : "";
+String menuMyOn = ("/myPage.jsp".equals(menuPath) || "/absenceForm.jsp".equals(menuPath)) ? " active" : "";
+String menuLoginOn = "/login.jsp".equals(menuPath) ? " active" : "";
+String menuJoinOn = "/join.jsp".equals(menuPath) ? " active" : "";
 %>
 <header
-	class="d-flex flex-wrap align-items-center justify-content-between pb-3 mb-4 border-bottom">
+	class="cc-header d-flex flex-wrap align-items-center justify-content-between pb-3 mb-4 border-bottom">
 	<a href="<%=menuCtx%>/events.jsp"
-		class="d-flex align-items-center text-dark text-decoration-none">
-		<span class="fs-4 fw-bold">ClubCheck</span>
+		class="cc-brand d-flex align-items-center text-decoration-none">
+		<span class="cc-brand-mark">&#10003;</span>
+		<span class="cc-brand-text fs-4 fw-bold">ClubCheck</span>
 	</a>
-	<ul class="nav nav-pills align-items-center">
-		<li class="nav-item"><a href="<%=menuCtx%>/events.jsp" class="nav-link"><fmt:message key="menu.events" /></a></li>
+	<ul class="nav cc-nav align-items-center">
+		<li class="nav-item"><a href="<%=menuCtx%>/events.jsp" class="nav-link<%=menuEventsOn%>"><fmt:message key="menu.events" /></a></li>
 		<%
 		if (menuLoginId == null) {
 		%>
-		<li class="nav-item"><a href="<%=menuCtx%>/login.jsp" class="nav-link"><fmt:message key="menu.login" /></a></li>
-		<li class="nav-item"><a href="<%=menuCtx%>/join.jsp" class="nav-link"><fmt:message key="menu.join" /></a></li>
+		<li class="nav-item"><a href="<%=menuCtx%>/login.jsp" class="nav-link<%=menuLoginOn%>"><fmt:message key="menu.login" /></a></li>
+		<li class="nav-item"><a href="<%=menuCtx%>/join.jsp" class="nav-link<%=menuJoinOn%>"><fmt:message key="menu.join" /></a></li>
 		<%
 		} else {
 			if (menuIsAdmin) {
 		%>
-		<li class="nav-item"><a href="<%=menuCtx%>/eventForm.jsp" class="nav-link"><fmt:message key="menu.addEvent" /></a></li>
-		<li class="nav-item"><a href="<%=menuCtx%>/members.jsp" class="nav-link"><fmt:message key="menu.members" /></a></li>
-		<li class="nav-item"><a href="<%=menuCtx%>/absenceReports.jsp" class="nav-link"><fmt:message key="menu.reports" /></a></li>
+		<li class="nav-item"><a href="<%=menuCtx%>/eventForm.jsp" class="nav-link<%=menuFormOn%>"><fmt:message key="menu.addEvent" /></a></li>
+		<li class="nav-item"><a href="<%=menuCtx%>/members.jsp" class="nav-link<%=menuMembersOn%>"><fmt:message key="menu.members" /></a></li>
+		<li class="nav-item"><a href="<%=menuCtx%>/absenceReports.jsp" class="nav-link<%=menuReportsOn%>"><fmt:message key="menu.reports" /></a></li>
 		<%
 			}
 			String menuUserName = util.HtmlUtil.escape(menuLoginName);
 		%>
-		<li class="nav-item"><a href="<%=menuCtx%>/myPage.jsp" class="nav-link">
+		<li class="nav-item"><a href="<%=menuCtx%>/myPage.jsp" class="nav-link<%=menuMyOn%>">
 			<fmt:message key="menu.user"><fmt:param value="<%=menuUserName%>" /></fmt:message>
 			<%
 			if (menuIsAdmin) {
@@ -52,15 +63,14 @@ String menuEnUrl = util.HtmlUtil.escape(util.LangUtil.switchUrl(menuUri, menuQue
 			}
 			%>
 		</a></li>
-		<li class="nav-item"><a href="<%=menuCtx%>/logout.jsp" class="nav-link"><fmt:message key="menu.logout" /></a></li>
+		<li class="nav-item"><a href="<%=menuCtx%>/logout.jsp" class="nav-link cc-logout"><fmt:message key="menu.logout" /></a></li>
 		<%
 		}
 		%>
 		<%-- 언어 전환: 고른 언어는 locale.jsp 가 쿠키에 저장한다 --%>
-		<li class="nav-item ms-2 small">
-			<a href="<%=menuKoUrl%>" class="<%="ko".equals(lang) ? "fw-bold text-dark" : "text-secondary"%> text-decoration-none">한국어</a>
-			<span class="text-secondary">|</span>
-			<a href="<%=menuEnUrl%>" class="<%="en".equals(lang) ? "fw-bold text-dark" : "text-secondary"%> text-decoration-none">English</a>
+		<li class="nav-item cc-lang">
+			<a href="<%=menuKoUrl%>" class="<%="ko".equals(lang) ? "on" : ""%>">한국어</a>
+			<a href="<%=menuEnUrl%>" class="<%="en".equals(lang) ? "on" : ""%>">English</a>
 		</li>
 	</ul>
 </header>

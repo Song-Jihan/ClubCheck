@@ -30,13 +30,14 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="<%=ctx%>/resources/css/bootstrap.min.css">
+<link rel="stylesheet" href="<%=ctx%>/resources/css/clubcheck.css">
 <title><fmt:message key="error.500.title" /> - ClubCheck</title>
 </head>
 <body>
 	<div class="container py-4">
 		<%@ include file="menu.jsp"%>
 
-		<div class="p-5 mb-4 bg-body-tertiary rounded-3 text-center">
+		<div class="cc-hero mb-4 text-center">
 			<p class="text-secondary mb-2"><fmt:message key="error.code"><fmt:param value="500" /></fmt:message></p>
 			<h1 class="display-6 fw-bold"><fmt:message key="error.500.title" /></h1>
 			<p class="fs-5"><fmt:message key="error.500.text" /></p>

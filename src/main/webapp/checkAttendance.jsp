@@ -64,6 +64,7 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="./resources/css/bootstrap.min.css">
+<link rel="stylesheet" href="./resources/css/clubcheck.css">
 <title><fmt:message key="check.pageTitle" /> - ClubCheck</title>
 </head>
 <body>
@@ -71,7 +72,7 @@
 		<%@ include file="menu.jsp"%>
 		<%@ include file="message.jsp"%>
 
-		<div class="p-5 mb-4 bg-body-tertiary rounded-3">
+		<div class="cc-hero mb-4">
 			<div class="container-fluid py-3">
 				<h1 class="display-6 fw-bold"><fmt:message key="check.pageTitle" /></h1>
 				<p class="fs-5 mb-0"><span class="badge <%=seminar ? "text-bg-primary" : "text-bg-info"%> fs-6"><fmt:message key="<%=typeKey%>" /></span>

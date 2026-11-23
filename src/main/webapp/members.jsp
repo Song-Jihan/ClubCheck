@@ -48,6 +48,7 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="./resources/css/bootstrap.min.css">
+<link rel="stylesheet" href="./resources/css/clubcheck.css">
 <title><fmt:message key="members.pageTitle" /> - ClubCheck</title>
 <style>
 	/* 행사가 많아 표가 옆으로 길어져도 이름 칸은 왼쪽에 고정한다 */
@@ -60,7 +61,7 @@
 	<div class="container py-4">
 		<%@ include file="menu.jsp"%>
 
-		<div class="p-5 mb-4 bg-body-tertiary rounded-3">
+		<div class="cc-hero mb-4">
 			<div class="container-fluid py-3">
 				<h1 class="display-6 fw-bold"><fmt:message key="members.pageTitle" /></h1>
 				<p class="col-md-8 fs-5 mb-0"><fmt:message key="members.lead"><fmt:param value="<%=memberCount%>" /></fmt:message></p>

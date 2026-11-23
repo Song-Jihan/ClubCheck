@@ -40,6 +40,7 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="./resources/css/bootstrap.min.css">
+<link rel="stylesheet" href="./resources/css/clubcheck.css">
 <title><fmt:message key="my.pageTitle" /> - ClubCheck</title>
 </head>
 <body>
@@ -47,7 +48,7 @@
 		<%@ include file="menu.jsp"%>
 		<%@ include file="message.jsp"%>
 
-		<div class="p-5 mb-4 bg-body-tertiary rounded-3">
+		<div class="cc-hero mb-4">
 			<div class="container-fluid py-3">
 				<h1 class="display-6 fw-bold"><fmt:message key="my.pageTitle" /></h1>
 				<p class="col-md-8 fs-5 mb-0"><fmt:message key="my.lead" /></p>

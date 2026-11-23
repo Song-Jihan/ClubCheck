@@ -1,0 +1,198 @@
+/* ClubCheck 공통 꾸밈. bootstrap.min.css 다음에 불러온다. */
+
+:root {
+	--cc-indigo: #4f46e5;
+	--cc-violet: #7c3aed;
+	--cc-teal: #0ea5a4;
+	--cc-ink: #1f2937;
+	--cc-soft: #eef2ff;
+}
+
+/* ---------- 상단바 ---------- */
+.cc-header {
+	position: sticky;
+	top: 0;
+	z-index: 1020;
+	padding-top: .75rem;
+	background: rgba(255, 255, 255, .92);
+	backdrop-filter: blur(8px);
+}
+
+/* 로고: 체크 표시 상자 + 그라데이션 글자 */
+.cc-brand {
+	gap: .5rem;
+}
+
+.cc-brand-mark {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	border-radius: .6rem;
+	background: linear-gradient(135deg, var(--cc-indigo), var(--cc-teal));
+	color: #fff;
+	font-weight: 700;
+	box-shadow: 0 4px 10px rgba(79, 70, 229, .3);
+}
+
+.cc-brand-text {
+	background: linear-gradient(90deg, var(--cc-indigo), var(--cc-teal));
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+/* 메뉴 링크: 둥근 알약 모양, 마우스를 올리면 살짝 떠오른다 */
+.cc-nav {
+	gap: .25rem;
+}
+
+.cc-nav .nav-link {
+	color: var(--cc-ink);
+	font-weight: 500;
+	border-radius: 999px;
+	padding: .4rem .95rem;
+	transition: background-color .15s ease, color .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+
+.cc-nav .nav-link:hover,
+.cc-nav .nav-link:focus-visible {
+	background-color: var(--cc-soft);
+	color: var(--cc-indigo);
+	transform: translateY(-1px);
+}
+
+/* 지금 보고 있는 화면의 메뉴 */
+.cc-nav .nav-link.active {
+	background: linear-gradient(135deg, var(--cc-indigo), var(--cc-violet));
+	color: #fff;
+	box-shadow: 0 4px 12px rgba(79, 70, 229, .35);
+}
+
+.cc-nav .nav-link.active .badge {
+	background-color: rgba(255, 255, 255, .25) !important;
+}
+
+/* 로그아웃은 빨간색으로 구분 */
+.cc-nav .nav-link.cc-logout:hover {
+	background-color: #fef2f2;
+	color: #dc2626;
+}
+
+/* 언어 전환: 두 칸짜리 토글 */
+.cc-lang {
+	display: inline-flex;
+	padding: .2rem;
+	margin-left: .5rem;
+	border-radius: 999px;
+	background-color: #f3f4f6;
+}
+
+.cc-lang a {
+	padding: .2rem .7rem;
+	border-radius: 999px;
+	font-size: .85rem;
+	color: #6b7280;
+	text-decoration: none;
+	transition: background-color .15s ease, color .15s ease;
+}
+
+.cc-lang a:hover {
+	color: var(--cc-indigo);
+}
+
+.cc-lang a.on {
+	background-color: #fff;
+	color: var(--cc-ink);
+	font-weight: 600;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+}
+
+/* ---------- 화면 위쪽 제목 영역 ---------- */
+.cc-hero {
+	position: relative;
+	overflow: hidden;
+	padding: 3rem;
+	border-radius: 1rem;
+	color: #fff;
+	background: linear-gradient(120deg, var(--cc-indigo) 0%, var(--cc-violet) 55%, var(--cc-teal) 100%);
+}
+
+/* 배경 장식: 반투명 원 두 개 */
+.cc-hero::before,
+.cc-hero::after {
+	content: "";
+	position: absolute;
+	border-radius: 50%;
+	pointer-events: none;
+}
+
+.cc-hero::before {
+	width: 320px;
+	height: 320px;
+	right: -80px;
+	top: -120px;
+	background: rgba(255, 255, 255, .14);
+}
+
+.cc-hero::after {
+	width: 200px;
+	height: 200px;
+	right: 180px;
+	bottom: -110px;
+	background: rgba(255, 255, 255, .10);
+}
+
+.cc-hero > * {
+	position: relative;   /* 장식보다 위에 보이게 */
+	z-index: 1;
+}
+
+/* 제목 위의 작은 이름표 */
+.cc-hero .container-fluid h1::before {
+	content: "CLUBCHECK";
+	display: block;
+	margin-bottom: .4rem;
+	font-size: .75rem;
+	font-weight: 600;
+	letter-spacing: .25em;
+	opacity: .75;
+}
+
+.cc-hero h1 {
+	text-shadow: 0 2px 8px rgba(0, 0, 0, .15);
+}
+
+.cc-hero p {
+	color: rgba(255, 255, 255, .9);
+}
+
+.cc-hero .text-secondary {
+	color: rgba(255, 255, 255, .75) !important;
+}
+
+.cc-hero .badge {
+	border: 1px solid rgba(255, 255, 255, .6);
+}
+
+/* 제목 영역 안의 버튼은 흰 버튼으로 */
+.cc-hero .btn-primary {
+	background-color: #fff;
+	border-color: #fff;
+	color: var(--cc-indigo);
+	font-weight: 600;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+}
+
+.cc-hero .btn-primary:hover {
+	background-color: var(--cc-soft);
+	border-color: var(--cc-soft);
+	color: var(--cc-indigo);
+}
+
+@media (max-width: 576px) {
+	.cc-hero {
+		padding: 2rem 1.5rem;
+	}
+}
